@@ -1,0 +1,1 @@
+# LGPD_Trabalho_ADS
