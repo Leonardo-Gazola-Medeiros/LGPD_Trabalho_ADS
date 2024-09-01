@@ -1,0 +1,81 @@
+/* LoginPage.css */
+
+/* Reset default margins and set full height for html and body */
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Wrapper to center the container */
+  .login-wrapper {
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center;    /* Centers vertically */
+    height: 100vh;          /* Full viewport height */
+    width: 100vw;           /* Full viewport width */
+    background-color: #f0f2f5; /* Optional: Light background color */
+  }
+  
+
+.login-container {
+    width: 350px; /* Increased width for better spacing */
+    padding: 30px; /* Increased padding for more space */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #ffffff; /* White background for contrast */
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    
+  }
+  
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  p {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .register-button {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+  }
+  
+  .register-button:hover {
+    text-decoration: underline;
+  }
+  
