@@ -15,6 +15,7 @@ const http = require('http');
 
 // IMPORTAÇÕES DE ROTAS DO BACKEND
 const userRoutes = require('./routes/userRoute');
+const homeRoute = require('./routes/homeRoute');
 
 
 
@@ -62,16 +63,7 @@ app.use(session({
 
 // ROTAS BACKEND
 app.use('/us', userRoutes);
-
-const con = require('./connect/dbconnect');
-
-con.query('SELECT 1', (err, results) => {
-  if (err) {
-    console.error('Error connecting to the database:', err);
-  } else {
-    console.log('Database connection established successfully.');
-  }
-});
+app.use('/msg', homeRoute);
 
 server.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`)})

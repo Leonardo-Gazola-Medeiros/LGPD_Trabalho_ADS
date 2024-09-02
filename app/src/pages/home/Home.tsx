@@ -1,24 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './HomePage.css';
 
 interface HomePageProps {
   username: string;
+  userId: number; // Add userId prop to identify the user
 }
 
 interface Message {
-  user: string;
-  content: string;
+  nome_usuario: string;
+  mensagem: string;
+  data: string;
 }
 
-const Home: React.FC<HomePageProps> = ({ username }) => {
+const Home: React.FC<HomePageProps> = ({ username, userId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
 
+  useEffect(() => {
+    // Fetch messages from backend
+    fetch('http://localhost:3000/msg')
+      .then(response => response.json())
+      .then(data => setMessages(data))
+      .catch(error => console.error('Error fetching messages:', error));
+  }, []);
+
   const handleSendMessage = () => {
     if (newMessage.trim() !== '') {
-      const message = { user: username, content: newMessage };
-      setMessages([...messages, message]);
-      setNewMessage('');
+      const message = { userId, message: newMessage };
+      
+      fetch('http://localhost:3000/msg', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(message),
+      })
+      .then(response => response.json())
+      .then(() => {
+        // Refresh messages after sending
+        return fetch('/msg/');
+      })
+      .then(response => response.json())
+      .then(data => {
+        setMessages(data);
+        setNewMessage('');
+      })
+      .catch(error => console.error('Error sending message:', error));
     }
   };
 
@@ -39,7 +66,7 @@ const Home: React.FC<HomePageProps> = ({ username }) => {
         <div className="message-area">
           {messages.map((message, index) => (
             <div key={index} className="message">
-              <strong>{message.user}: </strong> {message.content}
+              <strong>{message.nome_usuario}:</strong> {message.mensagem} <span className="timestamp">({new Date(message.data).toLocaleString()})</span>
             </div>
           ))}
         </div>
