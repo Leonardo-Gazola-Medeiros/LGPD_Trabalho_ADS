@@ -1,6 +1,6 @@
 const mysql = require('mysql2');
 const createTableQueries = require('./dbDefault');
-const initialInserts = require('./dbInsert');
+// const initialInserts = require('./dbInsert');
 
 const con = mysql.createConnection({
     host: "localhost",
@@ -35,7 +35,7 @@ con.query("CREATE DATABASE IF NOT EXISTS lgpd", function (err, result) {
                 console.log("Estrutura padrão do banco de dados criada");
 
 
-                // AGORA VAMOS POPULAR BANCO
+                /*
                 Object.keys(initialInserts).forEach(table => {
                     con.query(initialInserts[table], function (err, result) {
                         if (err) throw err;
@@ -46,7 +46,9 @@ con.query("CREATE DATABASE IF NOT EXISTS lgpd", function (err, result) {
             } else {
                 console.log("O banco de dados 'lgpd' já possui tabelas");
                 con.end();
+                */
             }
         });
     });
 });
+

@@ -1,61 +1,72 @@
 import React, { useState } from 'react';
+import axios from 'axios';  // Ensure axios is imported here
 import './Cadastro.css';
 
 const Cadastro: React.FC = () => {
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-
-  const handleRegister = () => {
-    // Handle registration logic here (e.g., API call)
-    console.log('Username:', username);
-    console.log('Password:', password);
-    console.log('Email:', email);
-  };
+  const [nome_usuario, setNomeUsuario] = useState('');
+  const [email_usuario, setEmailUsuario] = useState('');
+  const [senha_usuario, setSenhaUsuario] = useState('');
+  const [message, setMessage] = useState('');
 
   const redirectToLogin = () => {
     // Redirect to the login page
     window.location.href = '/login';
   };
 
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post('http://localhost:3000/us/register/', {
+        nome_usuario,
+        email_usuario,
+        senha_usuario,
+      });
+
+      setMessage(response.data.message);
+    } catch (error) {
+      console.error('There was an error!', error);
+      setMessage('Registration failed. Please try again.');
+    }
+  };
+
   return (
-    <div className="register-wrapper">
+    <div className='register-wrapper'>
       <div className="register-container">
         <h2>Cadastro</h2>
-        <form>
-          <div className="form-group">
+        <form onSubmit={handleRegister}>
+          <div className='form-group'>
             <label htmlFor="username">Username</label>
             <input
               type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Username"
+              value={nome_usuario}
+              onChange={(e) => setNomeUsuario(e.target.value)}
               required
             />
           </div>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
+          <div className='form-group'>
+            <label htmlFor="email">E-mail</label>
             <input
               type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              value={email_usuario}
+              onChange={(e) => setEmailUsuario(e.target.value)}
               required
             />
           </div>
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
+          <div className='form-group'>
+            <label htmlFor="senha">Senha</label>
             <input
               type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              value={senha_usuario}
+              onChange={(e) => setSenhaUsuario(e.target.value)}
               required
             />
           </div>
-          <button type="button" onClick={handleRegister}>
-            Register
-          </button>
+          <button type="submit">Register</button>
+          {message && <p>{message}</p>}
         </form>
         <p>
           Já tem uma conta?{' '}

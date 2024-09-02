@@ -13,7 +13,10 @@ const createTableQueries = {
         CREATE TABLE IF NOT EXISTS mensagens (
             id_user INT,
             mensagem VARCHAR(300),
+            data DATETIME,
             FOREIGN KEY (id_user) REFERENCES user(id_user) ON DELETE CASCADE
         );
     `
 };
+
+module.exports = createTableQueries
