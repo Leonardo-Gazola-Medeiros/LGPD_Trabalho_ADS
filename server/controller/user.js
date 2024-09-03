@@ -38,7 +38,6 @@ exports.loginUser = async (req, res) => {
   }
 
   try {
-    // Query to check if the user exists with the provided email and password
     con.query(
       'SELECT * FROM user WHERE email_usuario = ? AND senha_usuario = ?',
       [email_usuario, senha_usuario],
@@ -49,10 +48,12 @@ exports.loginUser = async (req, res) => {
         }
 
         if (results.length > 0) {
-          // User found, send success response
-          res.status(200).json({ message: 'Login successful', user: results[0] });
+          const user = results[0];
+          res.cookie('userId', user.id_user, { httpOnly: true, secure: false });
+          res.cookie('username', user.nome_usuario, { httpOnly: true, secure: false });
+
+          res.status(200).json({ message: 'Login successful', user });
         } else {
-          // User not found, send unauthorized response
           res.status(401).json({ error: 'Invalid email or password' });
         }
       }
@@ -62,4 +63,5 @@ exports.loginUser = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 

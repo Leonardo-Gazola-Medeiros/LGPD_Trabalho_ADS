@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './LoginPage.css';
 
+axios.defaults.withCredentials = true;
+
+
 const Login: React.FC = () => {
   const [email_usuario, setEmailUsuario] = useState('');
   const [senha_usuario, setSenhaUsuario] = useState('');

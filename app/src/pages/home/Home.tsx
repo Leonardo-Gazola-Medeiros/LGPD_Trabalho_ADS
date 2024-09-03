@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './HomePage.css';
-
-interface HomePageProps {
-  username: string;
-  userId: number; // Add userId prop to identify the user
-}
+import axios from 'axios';
 
 interface Message {
   nome_usuario: string;
@@ -12,12 +8,31 @@ interface Message {
   data: string;
 }
 
-const Home: React.FC<HomePageProps> = ({ username, userId }) => {
+axios.defaults.withCredentials = true;
+
+const Home: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
+  const [username, setUsername] = useState<string>('');
+  const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
-    // Fetch messages from backend
+    const getCookieValue = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+    };
+
+    const userIdFromCookie = getCookieValue('userId');
+    const usernameFromCookie = getCookieValue('username');
+
+    if (userIdFromCookie && usernameFromCookie) {
+      setUserId(Number(userIdFromCookie));
+      setUsername(usernameFromCookie);
+    } else {
+      console.error('User is not logged in');
+    }
+
     fetch('http://localhost:3000/msg')
       .then(response => response.json())
       .then(data => setMessages(data))
@@ -25,20 +40,27 @@ const Home: React.FC<HomePageProps> = ({ username, userId }) => {
   }, []);
 
   const handleSendMessage = () => {
-    if (newMessage.trim() !== '') {
-      const message = { userId, message: newMessage };
-      
+    if (newMessage.trim() !== '' && userId) {
+      const messagePayload = {
+        userId, // Use userId from the state
+        mensagem: newMessage,
+      };
+
       fetch('http://localhost:3000/msg', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(message),
+        body: JSON.stringify(messagePayload),
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(() => {
-        // Refresh messages after sending
-        return fetch('/msg/');
+        return fetch('http://localhost:3000/msg');
       })
       .then(response => response.json())
       .then(data => {
@@ -46,11 +68,12 @@ const Home: React.FC<HomePageProps> = ({ username, userId }) => {
         setNewMessage('');
       })
       .catch(error => console.error('Error sending message:', error));
+    } else {
+      console.error('User is not logged in or message is empty');
     }
   };
 
   const redirectLogin = () => {
-    // Redirect to the register page
     window.location.href = '/login';
   };
 
