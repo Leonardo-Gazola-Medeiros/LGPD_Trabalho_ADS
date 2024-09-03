@@ -25,7 +25,7 @@ html, body {
     border: 1px solid #ccc;
     border-radius: 8px;
     background-color: #ffffff; /* White background for contrast */
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 8px 12px rgba(0, 0, 0, 0.3);
   }
   
   /* Heading Styling */
@@ -69,10 +69,25 @@ html, body {
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+ 
+    margin-top: 6px
+  }
+
+  .cancelButton {
+    background-color: white;
+    color: slategray;
+  }
+  
+  .cancelButton:hover{
+    transition: 1s;
+    border: 1px solid black;
+    color: black;
+    background-color: white;
   }
   
   button:hover {
     background-color: #218838;
+    color: white;
   }
   
   /* Paragraph Styling */
@@ -89,10 +104,25 @@ html, body {
     color: #007bff;
     cursor: pointer;
     font-size: 16px;
-    padding: 0;
+    padding: 8px;
   }
   
   .login-button:hover {
     text-decoration: underline;
+  }
+  
+  .modalBox {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px; /* Adicione a unidade px */
+    background-color: #ffffff;
+    border: 1px solid #000; /* Remova as aspas */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adicione valores apropriados e a cor */
+    padding: 16px; /* Adicione a unidade px */
+    overflow-y: auto;
+    max-height: 80vh; /* Define uma altura máxima para a caixa modal */
   }
   
