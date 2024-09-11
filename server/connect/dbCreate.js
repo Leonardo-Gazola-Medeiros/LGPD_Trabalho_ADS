@@ -5,7 +5,7 @@ const createTableQueries = require('./dbDefault');
 const con = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "fatec",
+    password: "1234",
 });
 
 con.query("CREATE DATABASE IF NOT EXISTS lgpd", function (err, result) {

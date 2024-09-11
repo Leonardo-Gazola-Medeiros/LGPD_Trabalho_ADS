@@ -53,7 +53,7 @@ app.use(session({
 // ROTAS BACKEND
 app.use('/us', userRoutes);
 app.use('/msg', homeRoute);
-app.use('/ck', cookieRoute)
+//app.use('/ck', cookieRoute)
 
 // Handle 404 errors
 app.use((req, res, next) => {
