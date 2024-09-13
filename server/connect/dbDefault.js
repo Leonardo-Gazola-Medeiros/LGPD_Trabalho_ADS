@@ -1,55 +1,69 @@
 const createTableQueries = {
-    user: `
-        CREATE TABLE users (
-            id integer PRIMARY KEY,
-            username varchar(255),
-            senha varchar(255),
-            email varchar(200)
-        );
-    `,
+  users: `
+      CREATE TABLE users (
+      id INT PRIMARY KEY,
+      username VARCHAR(255),
+      senha VARCHAR(255),
+      email VARCHAR(200)
+      );
+  `,
 
-    mensagens: `
-        CREATE TABLE mensagens (
-            data timestamp,
-            mensagem varchar(300),
-            id_user integer
-    );
-    `,
+  mensagens: `
+      CREATE TABLE mensagens (
+      data TIMESTAMP,
+      mensagem VARCHAR(300),
+      id_user INT
+      );
+  `,
 
-    termos: `
-        CREATE TABLE termos (
-            versao integer PRIMARY KEY,
-            texto longtext
-);
-    `,
+  termos: `
+      CREATE TABLE termos (
+      version INT PRIMARY KEY,
+      texto LONGTEXT
+      );
+  `,
 
-    condicoes: `
-        CREATE TABLE condicoes (
-            id_condicao integer PRIMARY KEY,
-            versao_termo integer,
-            nome varchar(30),
-            obrigatorio bool
-);
-    `,
+  condicoes: `
+      CREATE TABLE condicoes (
+      id_condicao INT PRIMARY KEY,
+      version_id INT,
+      nome VARCHAR(30),
+      obrigatorio BOOL
+      );
+  `,
 
-    aceites: `
-        CREATE TABLE aceites (
-            id_user integer,
-            id_condicao integer,
-            aceite bool
-);
-    `,
-
-    foreign_keys: `
-        ALTER TABLE users ADD FOREIGN KEY (id) REFERENCES mensagens (id_user);
-
-        ALTER TABLE condicoes ADD FOREIGN KEY (versao_termo) REFERENCES termos (versao);
-
-        ALTER TABLE aceites ADD FOREIGN KEY (id_condicao) REFERENCES condicoes (id_condicao);
-
-        ALTER TABLE aceites ADD FOREIGN KEY (id_user) REFERENCES users (id);
-    `
+  aceites: `
+      CREATE TABLE aceites (
+      id_user INT,
+      id_condicao INT,
+      aceite BOOL
+      );
+  `
 };
+
+const createForeignKeys = {
+  fk_mensagens: `
+      ALTER TABLE mensagens 
+      ADD FOREIGN KEY (id_user) REFERENCES users(id);
+    `,
+
+  fk_condicoes: `
+      ALTER TABLE condicoes 
+      ADD FOREIGN KEY (version_id) REFERENCES termos(version);
+  `,
+
+  fk_aceites1: `
+      ALTER TABLE aceites 
+      ADD FOREIGN KEY (id_condicao) REFERENCES condicoes(id_condicao);
+  `,
+
+  fk_aceites2: `
+      ALTER TABLE aceites 
+      ADD FOREIGN KEY (id_user) REFERENCES users(id);
+  `
+};
+
+module.exports = { createTableQueries, createForeignKeys };
 
 /*
 
@@ -84,7 +98,7 @@ CREATE TABLE `mensagens` (
   `id_user` integer
 );
 
-ALTER TABLE `users` ADD FOREIGN KEY (`id`) REFERENCES `mensagens` (`id_user`);
+ALTER TABLE `mensagens` ADD FOREIGN KEY (`id_user`) REFERENCES `users` (`id`);
 
 ALTER TABLE `condicoes` ADD FOREIGN KEY (`versao_termo`) REFERENCES `termos` (`versao`);
 
@@ -94,4 +108,3 @@ ALTER TABLE `aceites` ADD FOREIGN KEY (`id_user`) REFERENCES `users` (`id`);
 
 */
 
-module.exports = createTableQueries
