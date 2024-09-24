@@ -5,9 +5,9 @@ import Modal from '@mui/material/Modal';
 import { Box, Typography } from '@mui/material';
 
 const Cadastro: React.FC = () => {
-  const [nome_usuario, setNomeUsuario] = useState('');
-  const [email_usuario, setEmailUsuario] = useState('');
-  const [senha_usuario, setSenhaUsuario] = useState('');
+  const [username, setNomeUsuario] = useState('');
+  const [email, setEmailUsuario] = useState('');
+  const [senha, setSenhaUsuario] = useState('');
   const [message, setMessage] = useState('');
   const [openModal,setOpenModal] = useState(false)
 
@@ -22,9 +22,9 @@ const Cadastro: React.FC = () => {
 
     try {
       const response = await axios.post('http://localhost:3000/us/register/', {
-        nome_usuario,
-        email_usuario,
-        senha_usuario,
+        username,
+        email,
+        senha,
       });
 
       setMessage(response.data.message);
@@ -47,7 +47,7 @@ const Cadastro: React.FC = () => {
             <input
               type="text"
               placeholder="Username"
-              value={nome_usuario}
+              value={username}
               onChange={(e) => setNomeUsuario(e.target.value)}
               required
             />
@@ -57,7 +57,7 @@ const Cadastro: React.FC = () => {
             <input
               type="email"
               placeholder="Email"
-              value={email_usuario}
+              value={email}
               onChange={(e) => setEmailUsuario(e.target.value)}
               required
             />
@@ -67,7 +67,7 @@ const Cadastro: React.FC = () => {
             <input
               type="password"
               placeholder="Password"
-              value={senha_usuario}
+              value={senha}
               onChange={(e) => setSenhaUsuario(e.target.value)}
               required
             />

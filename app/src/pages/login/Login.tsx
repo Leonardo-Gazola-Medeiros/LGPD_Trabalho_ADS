@@ -6,8 +6,8 @@ axios.defaults.withCredentials = true;
 
 
 const Login: React.FC = () => {
-  const [email_usuario, setEmailUsuario] = useState('');
-  const [senha_usuario, setSenhaUsuario] = useState('');
+  const [email, setEmailUsuario] = useState('');
+  const [senha, setSenhaUsuario] = useState('');
   const [message, setMessage] = useState('');
 
   const redirectToRegister = () => {
@@ -19,9 +19,12 @@ const Login: React.FC = () => {
     e.preventDefault();
 
     try {
+
+      console.log(email, senha)
+
       const response = await axios.post('http://localhost:3000/us/login', {
-        email_usuario,
-        senha_usuario,
+        email,
+        senha,
       });
 
       if (response.status === 200) {
@@ -45,7 +48,7 @@ const Login: React.FC = () => {
             <input
               type="email"
               placeholder="Email"
-              value={email_usuario}
+              value={email}
               onChange={(e) => setEmailUsuario(e.target.value)}
               required
             />
@@ -55,7 +58,7 @@ const Login: React.FC = () => {
             <input
               type="password"
               placeholder="Password"
-              value={senha_usuario}
+              value={senha}
               onChange={(e) => setSenhaUsuario(e.target.value)}
               required
             />

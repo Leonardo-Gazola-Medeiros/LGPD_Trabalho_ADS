@@ -3,8 +3,8 @@ const { createTableQueries, createForeignKeys } = require('./dbDefault');  // De
 
 const con = mysql.createConnection({
     host: "localhost",
-    user: "root",
-    password: "senha",
+    user: "lgpd",
+    password: "lgpd",
 });
 
 con.query("CREATE DATABASE IF NOT EXISTS lgpd", function (err, result) {

@@ -2,18 +2,18 @@ const con = require('../connect/dbconnect');
 
 
 exports.createUser = async (req, res) => {
-  const { nome_usuario, email_usuario, senha_usuario } = req.body;
+  const { username, email, senha } = req.body;
 
-  if (!nome_usuario || !email_usuario || !senha_usuario) {
+  if (!username || !email || !senha) {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
   try {
-    console.log('Inserting new user:', { nome_usuario, email_usuario, senha_usuario });  // Add this for debugging
+    console.log('Inserting new user:', { username, email, senha });  // Add this for debugging
 
     con.query(
-      'INSERT INTO user (nome_usuario, email_usuario, senha_usuario) VALUES (?, ?, ?)',
-      [nome_usuario, email_usuario, senha_usuario],
+      'INSERT INTO users (username, email, senha) VALUES (?, ?, ?)',
+      [username, email, senha],
       (err, results) => {
         if (err) {
           console.error('Error inserting user:', err);  // Log the specific error
@@ -31,16 +31,18 @@ exports.createUser = async (req, res) => {
 
 
 exports.loginUser = async (req, res) => {
-  const { email_usuario, senha_usuario } = req.body;
+  const { email, senha } = req.body;
 
-  if (!email_usuario || !senha_usuario) {
+  if (!email || !senha) {
     return res.status(400).json({ error: 'Both email and password are required' });
   }
 
+  console.log(email, senha)
+
   try {
     con.query(
-      'SELECT * FROM user WHERE email_usuario = ? AND senha_usuario = ?',
-      [email_usuario, senha_usuario],
+      'SELECT * FROM users WHERE email = ? AND senha = ?',
+      [email, senha],
       (err, results) => {
         if (err) {
           console.error('Database error:', err);
@@ -49,8 +51,8 @@ exports.loginUser = async (req, res) => {
 
         if (results.length > 0) {
           const user = results[0];
-          res.cookie('userId', user.id_user, { httpOnly: true, secure: false });
-          res.cookie('username', user.nome_usuario, { httpOnly: true, secure: false });
+          res.cookie('userId', user.id, { httpOnly: true, secure: false });
+          res.cookie('username', user.username, { httpOnly: true, secure: false });
 
           res.status(200).json({ message: 'Login successful', user });
         } else {
