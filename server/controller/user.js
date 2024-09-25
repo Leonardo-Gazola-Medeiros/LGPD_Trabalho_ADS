@@ -37,8 +37,6 @@ exports.loginUser = async (req, res) => {
     return res.status(400).json({ error: 'Both email and password are required' });
   }
 
-  console.log(email, senha)
-
   try {
     con.query(
       'SELECT * FROM users WHERE email = ? AND senha = ?',
@@ -51,10 +49,15 @@ exports.loginUser = async (req, res) => {
 
         if (results.length > 0) {
           const user = results[0];
-          res.cookie('userId', user.id, { httpOnly: true, secure: false });
-          res.cookie('username', user.username, { httpOnly: true, secure: false });
+          //res.cookie('userId', user.id, { httpOnly: true, secure: false });                         <------- CÓDIGO DO LÉO
+          //res.cookie('username', user.username, { httpOnly: true, secure: false });
 
-          res.status(200).json({ message: 'Login successful', user });
+          res
+          .cookie("userId", user.id, {  })
+          .cookie("username", user.username, { })
+          .status(200)
+          .json({ message: "Login successful" });
+
         } else {
           res.status(401).json({ error: 'Invalid email or password' });
         }
