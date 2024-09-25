@@ -17,14 +17,19 @@ const Home: React.FC = () => {
   const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
-    const getCookieValue = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(';').shift();
+    if(!document.cookie) window.location.href = '/login';
+
+    const getCookieValue = () => {
+      const cookieSplitado = document.cookie.split("=")
+      let iddousuario = cookieSplitado[1]
+      iddousuario.split(';')
+      iddousuario = iddousuario[0]
+      const nomedosusuario = cookieSplitado[2]
+
+      return [iddousuario, nomedosusuario] 
     };
 
-    const userIdFromCookie = getCookieValue('userId');
-    const usernameFromCookie = getCookieValue('username');
+    const [ userIdFromCookie, usernameFromCookie ] = getCookieValue();
 
     if (userIdFromCookie && usernameFromCookie) {
       setUserId(Number(userIdFromCookie));
@@ -74,6 +79,8 @@ const Home: React.FC = () => {
   };
 
   const redirectLogin = () => {
+    document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     window.location.href = '/login';
   };
 

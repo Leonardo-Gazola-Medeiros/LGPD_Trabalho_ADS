@@ -39,16 +39,16 @@ app.set('view engine', 'ejs');
 app.use(cookieParser());
 
 // COOKIES
-app.use(session({
-    secret: 'secret',
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        secure: false,
-        maxAge: 1000 * 60 * 60 * 24 // Um dia
-    },
-    name: 'userLogged'
-}));
+//app.use(session({
+//    secret: 'secret',
+//    resave: false,
+//    saveUninitialized: true,
+//    cookie: {
+//        secure: false,
+//       maxAge: 1000 * 60 * 60 * 24 // Um dia
+//    },
+//    name: 'userLogged'
+//}));
 
 // ROTAS BACKEND
 app.use('/us', userRoutes);

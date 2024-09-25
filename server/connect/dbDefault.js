@@ -1,7 +1,7 @@
 const createTableQueries = {
   users: `
       CREATE TABLE users (
-      id INT PRIMARY KEY,
+      id INT PRIMARY KEY AUTO_INCREMENT,
       username VARCHAR(255),
       senha VARCHAR(255),
       email VARCHAR(200)
