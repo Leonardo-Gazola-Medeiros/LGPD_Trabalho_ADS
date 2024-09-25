@@ -17,6 +17,8 @@ const Home: React.FC = () => {
   const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
+    if(!document.cookie) window.location.href = '/login';
+
     const getCookieValue = () => {
       const cookieSplitado = document.cookie.split("=")
       let iddousuario = cookieSplitado[1]
@@ -77,6 +79,8 @@ const Home: React.FC = () => {
   };
 
   const redirectLogin = () => {
+    document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     window.location.href = '/login';
   };
 

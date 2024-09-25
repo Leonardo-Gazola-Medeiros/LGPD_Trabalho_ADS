@@ -19,13 +19,10 @@ const Login: React.FC = () => {
     e.preventDefault();
 
     try {
-
       const response = await axios.post('http://localhost:3000/us/login', {
         email,
         senha,
       });
-
-      console.log(email, senha)
 
       if (response.status === 200) {
         setMessage('Login successful!');

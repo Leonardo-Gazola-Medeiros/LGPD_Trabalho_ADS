@@ -21,7 +21,7 @@ exports.getMessage = async (req, res) => {
   try {
     const query = 'SELECT u.username, m.mensagem, m.data FROM mensagens m JOIN users u ON m.id_user = u.id ORDER BY m.data DESC';
     con.query(query, results => {
-      console.log(results)
+      return !results ? res.json([]) : res.json(results)
     })
   } catch (error) {
     console.error(error.message)
