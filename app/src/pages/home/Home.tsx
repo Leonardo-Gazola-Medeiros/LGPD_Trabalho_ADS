@@ -17,15 +17,17 @@ const Home: React.FC = () => {
   const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
-    const getCookieValue = (name: string) => {
-      const value = `; ${document.cookie}`;
-      console.log(document.cookie)
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(';').shift();
+    const getCookieValue = () => {
+      const cookieSplitado = document.cookie.split("=")
+      let iddousuario = cookieSplitado[1]
+      iddousuario.split(';')
+      iddousuario = iddousuario[0]
+      const nomedosusuario = cookieSplitado[2]
+
+      return [iddousuario, nomedosusuario] 
     };
 
-    const userIdFromCookie = getCookieValue('userId');
-    const usernameFromCookie = getCookieValue('username');
+    const [ userIdFromCookie, usernameFromCookie ] = getCookieValue();
 
     if (userIdFromCookie && usernameFromCookie) {
       setUserId(Number(userIdFromCookie));

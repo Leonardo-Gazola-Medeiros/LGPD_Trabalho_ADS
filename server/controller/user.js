@@ -53,8 +53,8 @@ exports.loginUser = async (req, res) => {
           //res.cookie('username', user.username, { httpOnly: true, secure: false });
 
           res
-          .cookie("userId", user.id, {  })
-          .cookie("username", user.username, { })
+          .cookie("userId", user.id)
+          .cookie("username", user.username)
           .status(200)
           .json({ message: "Login successful" });
 
