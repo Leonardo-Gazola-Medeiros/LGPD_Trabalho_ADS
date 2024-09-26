@@ -3,7 +3,7 @@ import './HomePage.css';
 import axios from 'axios';
 
 interface Message {
-  nome_usuario: string;
+  username: string;
   mensagem: string;
   data: string;
 }
@@ -17,27 +17,36 @@ const Home: React.FC = () => {
   const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
-    if(!document.cookie) window.location.href = '/login';
-
-    const getCookieValue = () => {
-      const cookieSplitado = document.cookie.split("=")
-      let iddousuario = cookieSplitado[1]
-      iddousuario.split(';')
-      iddousuario = iddousuario[0]
-      const nomedosusuario = cookieSplitado[2]
-
-      return [iddousuario, nomedosusuario] 
+    // Verifica se há algum cookie, caso contrário, redireciona para a página de login
+    if (!document.cookie) {
+      window.location.href = '/login';
+    }
+  
+    // Função para extrair o valor de um cookie específico pelo nome
+    const getCookieValue = (name:string) => {
+      const cookies = document.cookie.split('; '); // Separa todos os cookies por "; "
+      const cookie = cookies.find(cookie => cookie.startsWith(`${name}=`)); // Encontra o cookie pelo nome
+  
+      if (cookie) {
+        return decodeURIComponent(cookie.split('=')[1]); // Retorna o valor do cookie, decodificado
+      }
+  
+      return null;
     };
-
-    const [ userIdFromCookie, usernameFromCookie ] = getCookieValue();
-
+  
+    // Obtém os valores dos cookies 'userId' e 'username'
+    const userIdFromCookie = getCookieValue('userId');
+    const usernameFromCookie = getCookieValue('username');
+  
     if (userIdFromCookie && usernameFromCookie) {
-      setUserId(Number(userIdFromCookie));
-      setUsername(usernameFromCookie);
+      setUserId(Number(userIdFromCookie)); // Converte o ID do usuário em número e define o estado
+      setUsername(usernameFromCookie); // Define o nome do usuário no estado
     } else {
       console.error('User is not logged in');
+      window.location.href = '/login'; // Redireciona para a página de login se não encontrar os cookies
     }
-
+  
+    // Fetch para obter mensagens do servidor
     fetch('http://localhost:3000/msg')
       .then(response => response.json())
       .then(data => setMessages(data))
@@ -58,21 +67,21 @@ const Home: React.FC = () => {
         },
         body: JSON.stringify(messagePayload),
       })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(() => {
-        return fetch('http://localhost:3000/msg');
-      })
-      .then(response => response.json())
-      .then(data => {
-        setMessages(data);
-        setNewMessage('');
-      })
-      .catch(error => console.error('Error sending message:', error));
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(() => {
+          return fetch('http://localhost:3000/msg');
+        })
+        .then(response => response.json())
+        .then(data => {
+          setMessages(data);
+          setNewMessage('');
+        })
+        .catch(error => console.error('Error sending message:', error));
     } else {
       console.error('User is not logged in or message is empty');
     }
@@ -83,7 +92,7 @@ const Home: React.FC = () => {
     document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     window.location.href = '/login';
   };
-
+  console.log(username)
   return (
     <div className="home-container">
       <div className="column user-column">
@@ -96,7 +105,9 @@ const Home: React.FC = () => {
         <div className="message-area">
           {messages.map((message, index) => (
             <div key={index} className="message">
-              <strong>{message.nome_usuario}:</strong> {message.mensagem} <span className="timestamp">({new Date(message.data).toLocaleString()})</span>
+              <p><strong>{message.username}</strong></p> 
+              <p className='chat-text'>{message.mensagem}</p> 
+              <span className="timestamp">({new Date(message.data).toLocaleString()})</span>
             </div>
           ))}
         </div>
