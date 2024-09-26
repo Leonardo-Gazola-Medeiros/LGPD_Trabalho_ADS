@@ -2,9 +2,9 @@ const mysql = require('mysql2');
 const { createTableQueries, createForeignKeys } = require('./dbDefault');  // Destructure to ensure correct object reference
 
 const con = mysql.createConnection({
-    host: "localhost",
-    user: "lgpd",
-    password: "lgpd",
+    host: process.env.DB_HOST ,
+    user: process.env.DB_USER ,
+    password: process.env.DB_PASSWORD ,
 });
 
 con.query("CREATE DATABASE IF NOT EXISTS lgpd", function (err, result) {
