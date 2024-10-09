@@ -69,4 +69,36 @@ exports.loginUser = async (req, res) => {
   }
 };
 
+exports.deleteUser = async (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+
+  try {
+    console.log('Attempting to delete user with ID:', userId); // Debugging log
+
+    con.query(
+      'DELETE FROM users WHERE id = ?',
+      [userId],
+      (err, results) => {
+        if (err) {
+          console.error('Error deleting user:', err); // Log specific error
+          return res.status(500).json({ error: 'Database error: ' + err.message });
+        }
+
+        if (results.affectedRows === 0) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+
+        console.log('User deleted successfully:', results); // Debugging log
+        res.status(200).json({ message: 'Usuário deletado com sucesso!' });
+      }
+    );
+  } catch (error) {
+    console.error('Error during deletion:', error); // Log specific error
+    res.status(500).json({ error: 'Internal server error: ' + error.message });
+  }
+};
 

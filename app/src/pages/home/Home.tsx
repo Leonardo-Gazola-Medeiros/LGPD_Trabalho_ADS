@@ -84,8 +84,9 @@ const Home: React.FC = () => {
   };
 
   const handleDeleteAccount = () => {
+    if (!window.confirm("Tem certeza que deseja deletar a sua conta?")) return
     if (userId) {
-      fetch(`http://localhost:3000/users/${userId}`, {
+      fetch(`http://localhost:3000/us/${userId}`, {
         method: 'DELETE',
       })
         .then(response => {

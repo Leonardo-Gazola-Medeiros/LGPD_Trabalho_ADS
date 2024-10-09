@@ -44,7 +44,8 @@ const createTableQueries = {
 const createForeignKeys = {
   fk_mensagens: `
       ALTER TABLE mensagens 
-      ADD FOREIGN KEY (id_user) REFERENCES users(id);
+      ADD FOREIGN KEY (id_user) REFERENCES users(id)
+      ON DELETE CASCADE;
     `,
 
   fk_condicoes: `
@@ -59,7 +60,8 @@ const createForeignKeys = {
 
   fk_aceites2: `
       ALTER TABLE aceites 
-      ADD FOREIGN KEY (id_user) REFERENCES users(id);
+      ADD FOREIGN KEY (id_user) REFERENCES users(id)
+      ON DELETE CASCADE;
   `
 };
 
