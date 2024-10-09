@@ -18,17 +18,37 @@
   border-right: 1px solid #ccc;
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
+
+.deleteButton {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-top: 10px;
+  width:65%;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 100px;
+}
+
+.deleteButton:hover {
+  background-color: darkred;
+}
+
 
 .logoutButton {
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 100px;
- 
+  margin-top: 238%;
   height: 55px;
   background-color: crimson;
+}
+
+.logoutButton:hover {
+  background-color: darkred;
 }
 
 .message-column {
@@ -87,5 +107,6 @@ button {
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: darkred;
 }
+

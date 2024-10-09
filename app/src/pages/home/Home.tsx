@@ -17,36 +17,32 @@ const Home: React.FC = () => {
   const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
-    // Verifica se há algum cookie, caso contrário, redireciona para a página de login
     if (!document.cookie) {
       window.location.href = '/login';
     }
-  
-    // Função para extrair o valor de um cookie específico pelo nome
-    const getCookieValue = (name:string) => {
-      const cookies = document.cookie.split('; '); // Separa todos os cookies por "; "
-      const cookie = cookies.find(cookie => cookie.startsWith(`${name}=`)); // Encontra o cookie pelo nome
-  
+
+    const getCookieValue = (name: string) => {
+      const cookies = document.cookie.split('; ');
+      const cookie = cookies.find(cookie => cookie.startsWith(`${name}=`));
+
       if (cookie) {
-        return decodeURIComponent(cookie.split('=')[1]); // Retorna o valor do cookie, decodificado
+        return decodeURIComponent(cookie.split('=')[1]);
       }
-  
+
       return null;
     };
-  
-    // Obtém os valores dos cookies 'userId' e 'username'
+
     const userIdFromCookie = getCookieValue('userId');
     const usernameFromCookie = getCookieValue('username');
-  
+
     if (userIdFromCookie && usernameFromCookie) {
-      setUserId(Number(userIdFromCookie)); // Converte o ID do usuário em número e define o estado
-      setUsername(usernameFromCookie); // Define o nome do usuário no estado
+      setUserId(Number(userIdFromCookie));
+      setUsername(usernameFromCookie);
     } else {
       console.error('User is not logged in');
-      window.location.href = '/login'; // Redireciona para a página de login se não encontrar os cookies
+      window.location.href = '/login';
     }
-  
-    // Fetch para obter mensagens do servidor
+
     fetch('http://localhost:3000/msg')
       .then(response => response.json())
       .then(data => setMessages(data))
@@ -56,7 +52,7 @@ const Home: React.FC = () => {
   const handleSendMessage = () => {
     if (newMessage.trim() !== '' && userId) {
       const messagePayload = {
-        userId, // Use userId from the state
+        userId,
         mensagem: newMessage,
       };
 
@@ -87,17 +83,36 @@ const Home: React.FC = () => {
     }
   };
 
+  const handleDeleteAccount = () => {
+    if (userId) {
+      fetch(`http://localhost:3000/users/${userId}`, {
+        method: 'DELETE',
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          alert('Conta deletada com sucesso!');
+          redirectLogin();
+        })
+        .catch(error => console.error('Erro ao deletar conta:', error));
+    }
+  };
+
   const redirectLogin = () => {
     document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     window.location.href = '/login';
   };
-  console.log(username)
+
   return (
     <div className="home-container">
       <div className="column user-column">
         <h2>{username}</h2>
-        <button type='button' onClick={redirectLogin} className='logoutButton'>
+        <button type="button" onClick={handleDeleteAccount} className="deleteButton">
+          Deletar minha conta
+        </button>
+        <button type="button" onClick={redirectLogin} className="logoutButton">
           Logout
         </button>
       </div>
@@ -105,14 +120,15 @@ const Home: React.FC = () => {
         <div className="message-area">
           {messages.map((message, index) => (
             <div key={index} className="message">
-              <p><strong>{message.username}</strong></p> 
-              <p className='chat-text'>{message.mensagem}</p> 
+              <p><strong>{message.username}</strong></p>
+              <p className="chat-text">{message.mensagem}</p>
               <span className="timestamp">({new Date(message.data).toLocaleString()})</span>
             </div>
           ))}
         </div>
         <div className="input-area">
-          <input className='chat-text'
+          <input
+            className="chat-text"
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
