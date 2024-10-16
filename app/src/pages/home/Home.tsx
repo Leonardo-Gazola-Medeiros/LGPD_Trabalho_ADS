@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './HomePage.css';
 import axios from 'axios';
-import { Modal } from '@mui/material';
+import { Button, Modal, TextareaAutosize } from '@mui/material';
 import { Box, Typography } from '@mui/material';
 
 interface Message {
@@ -18,6 +18,8 @@ const Home: React.FC = () => {
   const [username, setUsername] = useState<string>('');
   const [userId, setUserId] = useState<number | null>(null);
   const [openSettings, setOpenSettings] = useState(false);
+  const [openTermsUpdate, setOpenTermsUpdate] = useState(false);
+  const [termsText, setTermsText] = useState<string>('');
 
   useEffect(() => {
     if (!document.cookie) {
@@ -87,7 +89,7 @@ const Home: React.FC = () => {
   };
 
   const handleDeleteAccount = () => {
-    if (!window.confirm("Tem certeza que deseja deletar a sua conta?")) return
+    if (!window.confirm("Tem certeza que deseja deletar a sua conta?")) return;
     if (userId) {
       fetch(`http://localhost:3000/us/${userId}`, {
         method: 'DELETE',
@@ -103,9 +105,15 @@ const Home: React.FC = () => {
     }
   };
 
+  const handleSaveTerms = () => {
+    console.log("Termos salvos: ", termsText);
+    setOpenTermsUpdate(false);
+    setOpenSettings(true);
+  };
+
   const handleSettings = () => {
     setOpenSettings(true);
-  }
+  };
 
   const redirectLogin = () => {
     document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -148,6 +156,7 @@ const Home: React.FC = () => {
           <button onClick={handleSendMessage}>Send</button>
         </div>
       </div>
+
       <Modal
         className='modal_container'
         open={openSettings}
@@ -159,42 +168,92 @@ const Home: React.FC = () => {
           <Typography id="modal-title" variant="h4" component="h2">
             Settings
           </Typography>
-        <div>
-          <h4 id="modal-label">Consetimento de uso</h4>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h4 id="modal-label" style={{ margin: 0 }}>Consentimento de uso</h4>
+            <button
+              style={{ marginLeft: '150px' }}
+              onClick={() => {
+                setOpenSettings(false);
+                setOpenTermsUpdate(true);
+              }}
+            >
+              Atualizar termos
+            </button>
+          </div>
           <p>
             Você concorda com o uso de nossa parte dos seguintes dados
           </p>
-        </div>
-        <div className='divisor'></div>
-
-        <div>
-          <div className='opcoes_consent'>
-            <div className='texto_consent'>Armazenar informações do dispositivo</div><input className='check_consent' type="checkbox" role='switch' name="info_dispositivo" id="" />
-          </div>
-          <div className='opcoes_consent'>
-            <div className='texto_consent'>Uso dos dados do usuário</div><input className='check_consent' type="checkbox" role='switch' name="info_dispositivo" id="" />          </div>
-          <div className='opcoes_consent'>
-            <div className='texto_consent'>Criar perfis de anuncio personalizado</div><input className='check_consent' type="checkbox" role='switch' name="info_dispositivo" id="" />          </div>
-          <div className='opcoes_consent'>
-            <div className='texto_consent'>Usar perfis para anuncios personalizados</div><input className='check_consent' type="checkbox" role='switch' name="info_dispositivo" id="" />          </div>
-          <div className='opcoes_consent'>
-            <div className='texto_consent'>Desenvolver e aprimorar serviços</div><input className='check_consent' type="checkbox" role='switch' name="info_dispositivo" id="" />          </div>
-        </div>
-
-        <div className='botoes_footer_modal'>
-            <div className='options_modal_footer'>
-              <button> ver termos</button>
-              <button> rejeitar tudo</button>
-              <button> salvar e sair</button>
+          <div className='divisor'></div>
+          <div>
+            <div className='opcoes_consent'>
+              <div className='texto_consent'>Armazenar informações do dispositivo</div>
+              <input className='check_consent' type="checkbox" role='switch' name="info_dispositivo" />
             </div>
-        </div>
-
+            <div className='opcoes_consent'>
+              <div className='texto_consent'>Uso dos dados do usuário</div>
+              <input className='check_consent' type="checkbox" role='switch' name="info_dispositivo" />
+            </div>
+            <div className='opcoes_consent'>
+              <div className='texto_consent'>Criar perfis de anuncio personalizado</div>
+              <input className='check_consent' type="checkbox" role='switch' name="info_dispositivo" />
+            </div>
+            <div className='opcoes_consent'>
+              <div className='texto_consent'>Usar perfis para anuncios personalizados</div>
+              <input className='check_consent' type="checkbox" role='switch' name="info_dispositivo" />
+            </div>
+            <div className='opcoes_consent'>
+              <div className='texto_consent'>Desenvolver e aprimorar serviços</div>
+              <input className='check_consent' type="checkbox" role='switch' name="info_dispositivo" />
+            </div>
+          </div>
+          <div className='botoes_footer_modal'>
+            <div className='options_modal_footer'>
+              <button>Ver Termos</button>
+              <button>Rejeitar Tudo</button>
+              <button>Salvar e Sair</button>
+            </div>
+          </div>
         </Box>
-
       </Modal>
+
+      <Modal
+        className='modal_container'
+        open={openTermsUpdate}
+        onClose={() => setOpenTermsUpdate(false)}
+        aria-labelledby="update-terms-title"
+        aria-describedby="update-terms-description"
+      >
+        <Box className="modalBox" style={{ width: '600px', padding: '20px' }}>
+          <Typography id="update-terms-title" variant="h5" component="h2" gutterBottom>
+            Atualizar Termos de Condições
+          </Typography>
+          <TextareaAutosize
+            aria-label="empty textarea"
+            minRows={15}
+            placeholder="Escreva aqui os novos termos..."
+            style={{ width: '98%', padding: '10px', fontSize: '16px' }}
+            value={termsText}
+            onChange={(e) => setTermsText(e.target.value)}
+          />
+          <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between' }}>
+            <Button variant="contained" color="primary" onClick={handleSaveTerms}>
+              Salvar
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => {
+                setOpenTermsUpdate(false);
+                setOpenSettings(true);
+              }}
+            >
+              Fechar
+            </Button>
+          </div>
+        </Box>
+      </Modal>    
+
     </div>
-
-
   );
 };
 
