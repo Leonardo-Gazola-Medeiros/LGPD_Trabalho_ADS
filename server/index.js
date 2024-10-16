@@ -11,6 +11,7 @@ const path = require("path");
 const http = require('http');
 
 // IMPORTAÇÕES DE ROTAS DO BACKEND
+const termRoutes = require('./routes/termsRoute')
 const userRoutes = require('./routes/userRoute');
 const homeRoute = require('./routes/homeRoute');
 const cookieRoute = require('./routes/cookieRoute')
@@ -53,6 +54,7 @@ app.use(cookieParser());
 // ROTAS BACKEND
 app.use('/us', userRoutes);
 app.use('/msg', homeRoute);
+app.use('/term',termRoutes);
 // app.use('/ck', cookieRoute)
 
 // Handle 404 errors
