@@ -157,10 +157,10 @@ button:hover {
 
 
 .modalBox {
-  margin: 0px;
+  margin: 0px !important;
   padding: 0px !important;
   display: flexbox;
-  width: auto;
+  width: 40vw !important;
   height: auto;
   border-radius: 10px;
   border-style: solid;
@@ -182,10 +182,11 @@ button:hover {
 
 .modal_container {
   display: flex;
-  padding: 10px;
-  margin: 10px;
+  width: 100vw;
+  margin: 0px !important;
   align-content: center;
   filter: drop-shadow(0px 10px);
+
 }
 
 .options_modal_footer {
@@ -212,4 +213,30 @@ button:hover {
 .options_modal_footer button {
   margin: 5px 10px;
   font-size: 18px;
+}
+
+.modal_terms_text {
+  margin-left: 8px;
+  justify-content: left;
+  justify-items: flex-start;
+  text-align: left;
+}
+
+.top_modal_box {
+  display: flex;
+  margin: 0px 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal_title {
+  text-align: center;
+  align-items: center;
+  align-content: center;
+}
+
+.att_termos {
+  width: 30%;
+  align-items: flex-end;
+  align-content: right;
 }

@@ -165,13 +165,12 @@ const Home: React.FC = () => {
         aria-describedby="modal-modal-description"
       >
         <Box className="modalBox">
-          <Typography id="modal-title" variant="h4" component="h2">
-            Settings
-          </Typography>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className='modal_title'>
+            <h1>Configurações</h1>
+          </div>
+          <div className='top_modal_box'>
             <h4 id="modal-label" style={{ margin: 0 }}>Consentimento de uso</h4>
-            <button
-              style={{ marginLeft: '150px' }}
+            <button className='att_termos'
               onClick={() => {
                 setOpenSettings(false);
                 setOpenTermsUpdate(true);
@@ -180,7 +179,7 @@ const Home: React.FC = () => {
               Atualizar termos
             </button>
           </div>
-          <p>
+          <p className='modal_terms_text'>
             Você concorda com o uso de nossa parte dos seguintes dados
           </p>
           <div className='divisor'></div>
