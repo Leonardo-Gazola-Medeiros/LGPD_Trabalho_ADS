@@ -112,14 +112,15 @@ button:hover {
 
 .divisor {
   background-color: grey;
-  width: 100%;
+  width: auto;
   height: 1px;
   margin-bottom: 40px;
+  margin-top: 20px;
   
 }
 
 .opcoes_consent {
-  padding: 5px 5px 5px 10px;
+  padding: 5px 5px;
   margin: 10px 0px ;
   position: relative;
   width: 100%;
@@ -136,6 +137,7 @@ button:hover {
 
 .texto_consent {
   width: 80%;
+  margin-left: 10px;
   position: relative;
   font-weight: 500;
   font-variant: small-caps;
@@ -151,7 +153,7 @@ button:hover {
 
 .modalBox {
   margin: 0px;
-  padding: 0px;
+  padding: 0px !important;
   display: flexbox;
   width: auto;
   height: auto;
@@ -166,6 +168,7 @@ button:hover {
   display: flex;
   width: auto;
   height: auto;
+  padding: 10px;
   align-content: center;
   justify-content:center;
   align-items: center;
@@ -173,26 +176,28 @@ button:hover {
 }
 
 .modal_container {
-  display: flexbox;
-  padding: 0px;
-  margin: 0px;
-  align-content: flex-start;
+  display: flex;
+  padding: 10px;
+  margin: 10px;
+  align-content: center;
+  filter: drop-shadow(0px 10px);
 }
 
 .options_modal_footer {
   display: flex;
+  padding: 10px;
   flex-flow: row;
   flex-direction: row;
   color: #000000;
   width: auto;
 }
+
 .botoes_footer_modal {
   width: auto;
-  padding: 6px 5px;
   margin: 0px;
   display: flex;
   margin-left: -0%;
-  background-color: #0056b3;
+
   height: auto;
   justify-content: flex-end;
   align-items: flex-start;
