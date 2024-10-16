@@ -119,6 +119,11 @@ button:hover {
   
 }
 
+.settings {
+  border-radius: 100px;
+  width: 70%  ;
+}
+
 .opcoes_consent {
   padding: 5px 5px;
   margin: 10px 0px ;
@@ -206,5 +211,5 @@ button:hover {
 
 .options_modal_footer button {
   margin: 5px 10px;
-  font-size: 10px;
+  font-size: 18px;
 }
