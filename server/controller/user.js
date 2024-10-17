@@ -1,4 +1,5 @@
 const con = require('../connect/dbconnect');
+const mysql = require('mysql2');
 
 
 exports.createUser = async (req, res) => {
@@ -53,10 +54,10 @@ exports.loginUser = async (req, res) => {
           //res.cookie('username', user.username, { httpOnly: true, secure: false });
 
           res
-          .cookie("userId", user.id)
-          .cookie("username", user.username)
-          .status(200)
-          .json({ message: "Login successful" });
+            .cookie("userId", user.id)
+            .cookie("username", user.username)
+            .status(200)
+            .json({ message: "Login successful" });
 
         } else {
           res.status(401).json({ error: 'Invalid email or password' });
@@ -78,6 +79,35 @@ exports.deleteUser = async (req, res) => {
 
   try {
     console.log('Attempting to delete user with ID:', userId); // Debugging log
+
+      // Buscar o e-mail do usuário a ser deletado
+      const [results] = await con.promise().query('SELECT email FROM users WHERE id = ?', [userId]);
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'Usuário não encontrado' });
+      }
+  
+      const { email } = results[0];
+  
+
+
+
+    const query = 'SELECT email FROM users WHERE id = ?';
+    con.query(query, [userId], (err, results) => {
+      if (err) {
+        console.error('Error fetching user email:', err); // Log specific error
+        return res.status(500).json({ error: 'Database error: ' + err.message });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const { email } = results[0];
+      addUserDeleteList(email);
+      console.log('User email:', email); // Debugging log
+    });
+
 
     con.query(
       'DELETE FROM users WHERE id = ?',
@@ -101,4 +131,33 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
+
+
+function addUserDeleteList(email) {
+  const deleteDatabaseCon = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "1726",
+    database: "lgpd_removed_users"
+  });
+
+  deleteDatabaseCon.connect((err) => {
+    if (err) {
+      console.error('Erro ao conectar:', err);
+      return;
+    }
+    console.log('Conexão bem sucedida');
+  });
+
+  deleteDatabaseCon.query("INSERT INTO users (email) VALUES (?)", [email], (err, result) => {
+    if (err) {
+      console.error('Erro ao inserir email no banco:', err);
+    } else {
+      console.log('Email inserido no banco com sucesso:', result);
+    }
+  });
+
+
+
+}
 
