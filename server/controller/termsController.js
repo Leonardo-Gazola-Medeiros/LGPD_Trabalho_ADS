@@ -12,14 +12,15 @@ exports.InsertTerm = async (req,res) => {
     })
 };
 
-exports.getAllTerms = async (req,res) => {
-    const query = 'SELECT * FROM termos WHERE version=(SELECT max(version))'
-    con.query(query,(error,results) => {
-        if(error){
-            console.error("Error when get term: ", error);
-            return res.status(500).json({error:'Database error: ' + error.message})
+exports.getAllTerms = async (req, res) => {
+    const query = 'SELECT * FROM termos WHERE version ORDER BY version DESC LIMIT 1';
+    con.query(query, (error, results) => {
+        if (error) {
+            console.error("Error when getting terms: ", error);
+            return res.status(500).json({ error: 'Database error: ' + error.message });
         }
-        res.status(201).json({id:results.insertId})
-    })
+        res.status(200).json(results);
+    });
 };
+
 
