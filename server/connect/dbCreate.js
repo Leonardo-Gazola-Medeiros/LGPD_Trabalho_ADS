@@ -1,70 +1,65 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');  // Usando o módulo 'promise' para trabalhar com async/await
 const { createTableQueries, createForeignKeys } = require('./dbDefault');
 const { insertDefaultValues } = require('./dbInsert');  // Importa os valores padrões a serem inseridos
 
-const con = mysql.createConnection({
-    host: "localhost",
-    user: "lgpd",
-    password: "lgpd",
-});
+(async () => {
+    try {
+        const con = await mysql.createConnection({
+            host: "localhost",
+            user: "root",
+            password: "1726",
+        });
 
-con.query("CREATE DATABASE IF NOT EXISTS lgpd", function (err, result) {
-    if (err) throw err;
+        // Criar banco de dados 'lgpd'
+        await con.query("CREATE DATABASE IF NOT EXISTS lgpd");
+        await con.query("USE lgpd");
 
-    con.query("USE lgpd", function (err, result) {
-        if (err) {
-            console.error("Erro ao selecionar o banco de dados 'lgpd':", err);
-            con.end();
-            return;
+        // Verificar tabelas existentes
+        const [rows] = await con.query("SHOW TABLES");
+        const tables = rows.map(row => Object.values(row)[0]);
+
+        // Função para criar tabelas se elas não existirem
+        const createTableIfNotExists = async (tableName, createQuery) => {
+            if (!tables.includes(tableName)) {
+                if (createQuery) {
+                    await con.query(createQuery);
+                    console.log(`Tabela ${tableName} criada com sucesso`);
+                } else {
+                    console.error(`Nenhuma query de criação encontrada para ${tableName}`);
+                }
+            } else {
+                console.log(`Tabela ${tableName} já existe`);
+            }
+        };
+
+        // Iterar sobre as queries de criação de tabelas
+        for (const tableName of Object.keys(createTableQueries)) {
+            const createQuery = createTableQueries[tableName];
+            await createTableIfNotExists(tableName, createQuery);
         }
 
-        con.query("SHOW TABLES", function (err, result) {
-            if (err) throw err;
+        console.log("Estrutura padrão do banco de dados criada");
 
-            const tables = result.map(row => Object.values(row)[0]);
+        // Criar chaves estrangeiras
+        for (const fkName of Object.keys(createForeignKeys)) {
+            await con.query(createForeignKeys[fkName]);
+            console.log(`${fkName} criada com sucesso`);
+        }
 
-            // Função para criar tabelas se elas não existirem
-            const createTableIfNotExists = (tableName, createQuery) => {
-                if (!tables.includes(tableName)) {
-                    if (createQuery) {
-                        con.query(createQuery, function (err, result) {
-                            if (err) throw err;
-                            console.log(`Tabela ${tableName} criada com sucesso`);
-                        });
-                    } else {
-                        console.error(`Nenhuma query de criação encontrada para ${tableName}`);
-                    }
-                } else {
-                    console.log(`Tabela ${tableName} já existe`);
-                }
-            };
+        // Inserir valores padrões
+        for (const table of Object.keys(insertDefaultValues)) {
+            await con.query(insertDefaultValues[table]);
+            console.log(`Valores padrões inseridos em ${table}`);
+        }
 
-            // Itera sobre as queries de criação de tabelas
-            Object.keys(createTableQueries).forEach(tableName => {
-                const createQuery = createTableQueries[tableName];
-                createTableIfNotExists(tableName, createQuery);
-            });
+        // Criar banco de dados 'lgpd_removed_users' e tabela 'users'
+        await con.query("CREATE DATABASE IF NOT EXISTS lgpd_removed_users");
+        await con.query("USE lgpd_removed_users");
+        await createTableIfNotExists("users", "CREATE TABLE users (id INT PRIMARY KEY AUTO_INCREMENT, email VARCHAR(200))");
+        console.log("Estrutura padrão do banco de dados 'lgpd_removed_users' criada");
 
-            console.log("Estrutura padrão do banco de dados criada");
-
-            // Após criar as tabelas, adicione as chaves estrangeiras
-            Object.keys(createForeignKeys).forEach(fkName => {
-                con.query(createForeignKeys[fkName], function (err, result) {
-                    if (err) throw err;
-                    console.log(`${fkName} criada com sucesso`);
-                });
-            });
-
-            // Insere valores padrões após criar as tabelas e chaves estrangeiras
-            Object.keys(insertDefaultValues).forEach(table => {
-                con.query(insertDefaultValues[table], function (err, result) {
-                    if (err) throw err;
-                    console.log(`Valores padrões inseridos em ${table}`);
-                });
-            });
-
-            con.end();  // Encerra a conexão após finalizar todas as operações
-
-        });
-    });
-});
+        await con.end();  // Fechar a conexão no final de todas as operações
+    } catch (err) {
+        console.error("Erro:", err);
+    }
+})();

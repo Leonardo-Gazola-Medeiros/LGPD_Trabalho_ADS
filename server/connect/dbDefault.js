@@ -17,10 +17,10 @@ const createTableQueries = {
   `,
 
   termos: `
-      CREATE TABLE termos (
-      version INT PRIMARY KEY AUTO_INCREMENT,
-      texto LONGTEXT
-      );
+    CREATE TABLE termos (
+    version INT PRIMARY KEY AUTO_INCREMENT,
+    texto LONGTEXT
+);
   `,
 
   condicoes: `
