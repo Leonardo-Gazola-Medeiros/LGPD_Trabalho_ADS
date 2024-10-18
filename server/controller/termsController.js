@@ -22,5 +22,3 @@ exports.getAllTerms = async (req, res) => {
         res.status(200).json(results);
     });
 };
-
-

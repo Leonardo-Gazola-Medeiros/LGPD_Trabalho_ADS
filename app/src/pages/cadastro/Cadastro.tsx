@@ -1,34 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';  // Ensure axios is imported here
+import React, { useState } from 'react';
+import axios from 'axios';
 import './Cadastro.css';
 import Modal from '@mui/material/Modal';
 import { Box, Typography } from '@mui/material';
+
+interface Term {
+  version: number;
+  texto: string;
+}
 
 const Cadastro: React.FC = () => {
   const [username, setNomeUsuario] = useState('');
   const [email, setEmailUsuario] = useState('');
   const [senha, setSenhaUsuario] = useState('');
   const [message, setMessage] = useState('');
-  const [openModal,setOpenModal] = useState(false);
-
-  const [term, setTerm] = useState('');
-
-  useEffect(() => {
-
-    fetch('http://localhost:3000/term')
-      .then(response => response.json())
-      .then(term => setTerm(term[0].texto))
-      .catch(error => console.error('Error fetching recent terms', error))
-  }, [])
+  const [openModal, setOpenModal] = useState(false);  
 
   const redirectToLogin = () => {
-    // Redirect to the login page
     window.location.href = '/login';
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setOpenModal(false)
+    setOpenModal(false);
 
     try {
       const response = await axios.post('http://localhost:3000/us/register/', {
@@ -49,8 +43,8 @@ const Cadastro: React.FC = () => {
       <div className="register-container">
         <h2>Cadastro</h2>
         <form onSubmit={(event) => {
-          event.preventDefault()
-          setOpenModal(true)
+          event.preventDefault();
+          setOpenModal(true);
         }}>
           <div className='form-group'>
             <label htmlFor="username">Username</label>
@@ -92,6 +86,7 @@ const Cadastro: React.FC = () => {
           </button>
         </p>
       </div>
+
       <Modal
         open={openModal}
         onClose={() => setOpenModal(false)}
@@ -103,17 +98,13 @@ const Cadastro: React.FC = () => {
             Termo de consentimento
           </Typography>
           <Typography id="modal-modal-description" sx={{ my: 4 }}>
-          {term}
+            {JSON.parse(localStorage.getItem("terms") || "[]")[0].texto}
           </Typography>
           <button onClick={handleRegister}>Eu concordo</button>
           <button className='cancelButton' onClick={redirectToLogin}>Não concordo</button>
         </Box>
-        
       </Modal>
     </div>
-
-
-
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './LoginPage.css';
 
@@ -10,8 +10,15 @@ const Login: React.FC = () => {
   const [senha, setSenhaUsuario] = useState('');
   const [message, setMessage] = useState('');
 
+  useEffect(() => {
+    axios.get('http://localhost:3000/term')
+      .then(response => {
+        localStorage.setItem("terms", JSON.stringify(response.data));
+      })
+      .catch(error => console.error('Error fetching recent terms', error));
+  }, []);
+
   const redirectToRegister = () => {
-    // Redirect to the register page
     window.location.href = '/register';
   };
 
@@ -26,7 +33,6 @@ const Login: React.FC = () => {
 
       if (response.status === 200) {
         setMessage('Login successful!');
-        // You can also redirect the user to the homepage or save the user session
         window.location.href = '/';
       }
     } catch (error) {

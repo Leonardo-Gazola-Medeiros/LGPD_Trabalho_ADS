@@ -19,7 +19,10 @@ const Home: React.FC = () => {
   const [userId, setUserId] = useState<number | null>(null);
   const [openSettings, setOpenSettings] = useState(false);
   const [openTermsUpdate, setOpenTermsUpdate] = useState(false);
-  const [termsText, setTermsText] = useState<string>('');
+
+  const [termsText, setTermsText] = useState<string>('');  
+  const [tempTermsText, setTempTermsText] = useState<string>('');  // Valor temporário para os termos
+  const [initialTermsText, setInitialTermsText] = useState<string>(''); // Valor inicial para restaurar
 
   useEffect(() => {
     if (!document.cookie) {
@@ -52,6 +55,13 @@ const Home: React.FC = () => {
       .then(response => response.json())
       .then(data => setMessages(data))
       .catch(error => console.error('Error fetching messages:', error));
+
+    const termsFromLocalStorage = localStorage.getItem("terms");
+    if (termsFromLocalStorage) {
+      const parsedTerms = JSON.parse(termsFromLocalStorage);
+      setTermsText(parsedTerms[0].texto); // Carrega o termo salvo ao iniciar
+      setInitialTermsText(parsedTerms[0].texto); // Salva o valor inicial para poder restaurar
+    }
   }, []);
 
   const handleSendMessage = () => {
@@ -106,9 +116,32 @@ const Home: React.FC = () => {
   };
 
   const handleSaveTerms = () => {
-    console.log("Termos salvos: ", termsText);
-    setOpenTermsUpdate(false);
-    setOpenSettings(true);
+    if(!window.confirm("Tem certeza que deseja alterar os termos de uso?")){
+      setOpenTermsUpdate(false);
+      setOpenSettings(true);
+      return;
+    }
+  
+    const updatedTerms = { texto: tempTermsText };
+    localStorage.setItem("terms", JSON.stringify([updatedTerms]));
+  
+    fetch('http://localhost:3000/term', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedTerms),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      alert("Termos atualizados com sucesso!");
+      setTermsText(tempTermsText);
+      setOpenTermsUpdate(false);
+      setOpenSettings(true);
+    })
+    .catch(error => console.error('Erro ao atualizar termos:', error));
   };
 
   const handleSettings = () => {
@@ -173,6 +206,7 @@ const Home: React.FC = () => {
             <button className='att_termos'
               onClick={() => {
                 setOpenSettings(false);
+                setTempTermsText(termsText); // Define o texto temporário ao abrir o modal
                 setOpenTermsUpdate(true);
               }}
             >
@@ -231,8 +265,8 @@ const Home: React.FC = () => {
             minRows={15}
             placeholder="Escreva aqui os novos termos..."
             style={{ width: '98%', padding: '10px', fontSize: '16px' }}
-            value={termsText}
-            onChange={(e) => setTermsText(e.target.value)}
+            value={tempTermsText}  // O valor do textarea agora é o estado temporário
+            onChange={(e) => setTempTermsText(e.target.value)}  // Atualiza o estado temporário
           />
           <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between' }}>
             <Button variant="contained" color="primary" onClick={handleSaveTerms}>
@@ -244,13 +278,14 @@ const Home: React.FC = () => {
               onClick={() => {
                 setOpenTermsUpdate(false);
                 setOpenSettings(true);
+                setTempTermsText(initialTermsText); // Restaura o valor original se não salvar
               }}
             >
               Fechar
             </Button>
           </div>
         </Box>
-      </Modal>    
+      </Modal> 
 
     </div>
   );
