@@ -19,6 +19,7 @@ const Home: React.FC = () => {
   const [userId, setUserId] = useState<number | null>(null);
   const [openSettings, setOpenSettings] = useState(false);
   const [openTermsUpdate, setOpenTermsUpdate] = useState(false);
+  const [openTerms, setOpenTerms] = useState(false);
 
   const [termsText, setTermsText] = useState<string>('');  
   const [tempTermsText, setTempTermsText] = useState<string>('');  // Valor temporário para os termos
@@ -121,6 +122,8 @@ const Home: React.FC = () => {
       setOpenSettings(true);
       return;
     }
+
+  
   
     const updatedTerms = { texto: tempTermsText };
     localStorage.setItem("terms", JSON.stringify([updatedTerms]));
@@ -241,7 +244,12 @@ const Home: React.FC = () => {
           </div>
           <div className='botoes_footer_modal'>
             <div className='options_modal_footer'>
-              <button>Ver Termos</button>
+              <button
+                onClick={() => {
+                  setOpenSettings(false);
+                  setOpenTerms(true);
+                  setTempTermsText(tempTermsText);
+                }}>Ver Termos</button>
               <button>Rejeitar Tudo</button>
               <button>Salvar e Sair</button>
             </div>
@@ -285,7 +293,35 @@ const Home: React.FC = () => {
             </Button>
           </div>
         </Box>
-      </Modal> 
+      </Modal > 
+
+      <Modal
+        className='modal_container'
+        open={openTerms}
+        onClose={() => setOpenTerms(false)}
+        aria-labelledby="update-terms-title"
+        aria-describedby="update-terms-description"
+      >
+        <Box className="modalBox" style={{ width: '600px', padding: '20px' }}> 
+          <div className='modal_title'>
+            <h1>Termos</h1>
+          </div>
+          <Typography style={{textAlign: 'justify'}}>
+              {tempTermsText}
+          </Typography>
+          <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => {
+                setOpenTerms(false);
+                setOpenSettings(true);
+                setTempTermsText(tempTermsText);
+              }}
+          >
+            Fechar
+          </Button>
+        </Box>
+      </Modal>
 
     </div>
   );
