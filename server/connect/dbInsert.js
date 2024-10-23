@@ -6,4 +6,29 @@ const insertDefaultValues = {
     `
 }
 
-module.exports = { insertDefaultValues }
+const insertDefaulConditions = {
+    conditions: `
+        INSERT INTO condicoes(version_id,nome,obrigatorio)
+        VALUES 
+        (1, 'Armazenar informações do dispositivo', 0),
+        (1, 'Uso dos dados do usuário', 0),
+        (1, 'Criar perfis de anuncio personalizado', 0),
+        (1, 'Usar perfis para anuncios personalizados', 0),
+        (1, 'Desenvolver e aprimorar serviços com base nos dados', 0)
+    `
+}
+
+const insertDefaultUser = {
+    users: `
+        INSERT INTO users(username,senha,email)
+        VALUES
+        ('admin','admin','admin@admin.com'),
+        ('leo','leo','leo@leo.com'),
+        ('pedro','pedro','pedro@pedro.com'),
+        ('gustavo','gustavo','gustavo@gustavo.com')
+    `
+}
+
+
+
+module.exports = { insertDefaultValues, insertDefaulConditions, insertDefaultUser }

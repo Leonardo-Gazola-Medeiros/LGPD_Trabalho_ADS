@@ -25,9 +25,9 @@ const createTableQueries = {
 
   condicoes: `
       CREATE TABLE condicoes (
-      id_condicao INT PRIMARY KEY,
+      id_condicao INT PRIMARY KEY AUTO_INCREMENT,
       version_id INT,
-      nome VARCHAR(30),
+      nome LONGTEXT,
       obrigatorio BOOL
       );
   `,

@@ -157,6 +157,68 @@ const Home: React.FC = () => {
     window.location.href = '/login';
   };
 
+
+  const handleRejectAll = () => {
+    // Desmarca todas as checkboxes
+    const checkboxes = document.querySelectorAll('.check_consent');
+    checkboxes.forEach((checkbox) => checkbox.checked = false);
+  
+    // Prepara os dados para enviar
+    const consentData = {
+      info_dispositivo: false,
+      dados_usuario: false,
+      perfis_anuncio_personalizado: false,
+      usar_perfis_anuncios: false,
+      desenvolver_servicos: false
+    };
+  
+    // Faz a requisição para o servidor
+    fetch('http://localhost:3000/acc', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(consentData),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        alert("Todas as opções foram rejeitadas.");
+        setOpenSettings(false); // Fecha o modal
+      })
+      .catch(error => console.error('Erro ao enviar consentimento:', error));
+  };
+  
+  const handleSaveAndExit = () => {
+    // Pega o status de todas as checkboxes
+    const consentData = {
+      info_dispositivo: document.querySelector('input[name="info_dispositivo"]'),
+      dados_usuario: document.querySelector('input[name="dados_usuario"]'),
+      perfis_anuncio_personalizado: document.querySelector('input[name="perfis_anuncio_personalizado"]'),
+      usar_perfis_anuncios: document.querySelector('input[name="usar_perfis_anuncios"]'),
+      desenvolver_servicos: document.querySelector('input[name="desenvolver_servicos"]'),
+    };
+  
+    // Faz a requisição para o servidor com os dados selecionados
+    fetch('http://localhost:3000/acc', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(consentData),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        alert("Consentimento salvo com sucesso.");
+        setOpenSettings(false); // Fecha o modal
+      })
+      .catch(error => console.error('Erro ao enviar consentimento:', error));
+  };
+  
+
   return (
     <div className="home-container">
       <div className="column user-column">
@@ -223,7 +285,7 @@ const Home: React.FC = () => {
           <div>
             <div className='opcoes_consent'>
               <div className='texto_consent'>Armazenar informações do dispositivo</div>
-              <input className='check_consent' type="checkbox" role='switch' name="info_dispositivo" />
+              <input className='check_consent' id='desenvolver_servicos' type="checkbox" role='switch' name="info_dispositivo" />
             </div>
             <div className='opcoes_consent'>
               <div className='texto_consent'>Uso dos dados do usuário</div>
@@ -239,7 +301,7 @@ const Home: React.FC = () => {
             </div>
             <div className='opcoes_consent'>
               <div className='texto_consent'>Desenvolver e aprimorar serviços</div>
-              <input className='check_consent' type="checkbox" role='switch' name="info_dispositivo" />
+              <input className='check_consent' id='desenvolver_servicos' type="checkbox" role='switch' name="info_dispositivo" />
             </div>
           </div>
           <div className='botoes_footer_modal'>
@@ -250,8 +312,8 @@ const Home: React.FC = () => {
                   setOpenTerms(true);
                   setTempTermsText(tempTermsText);
                 }}>Ver Termos</button>
-              <button>Rejeitar Tudo</button>
-              <button>Salvar e Sair</button>
+              <button onClick={handleRejectAll}>Rejeitar Tudo</button>
+              <button onClick={handleSaveAndExit}>Salvar e Sair</button>
             </div>
           </div>
         </Box>

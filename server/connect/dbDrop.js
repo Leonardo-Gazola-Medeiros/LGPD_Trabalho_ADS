@@ -14,7 +14,14 @@ con.connect(function(err) {
 	con.query(sql, function (err, result) {
 		if (err) throw err;
 		console.log("Database lgpd deletada");
+	
+	var sql ='DROP DATABASE lgpd_removed_users';
+	con.query(sql, function (err, result) {
+		if (err) throw err;
+		console.log('tudo deletado');
+		
 		
 		con.end();
 	});	
+	});
 });

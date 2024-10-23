@@ -1,13 +1,13 @@
 const mysql = require('mysql2/promise');  // Usando o módulo 'promise' para trabalhar com async/await
 const { createTableQueries, createForeignKeys } = require('./dbDefault');
-const { insertDefaultValues } = require('./dbInsert');  // Importa os valores padrões a serem inseridos
+const { insertDefaultValues, insertDefaulConditions, insertDefaultUser } = require('./dbInsert');  // Importa os valores padrões a serem inseridos
 
 (async () => {
     try {
         const con = await mysql.createConnection({
             host: "localhost",
             user: "root",
-            password: "1726",
+            password: "senha",
         });
 
         // Criar banco de dados 'lgpd'
@@ -50,6 +50,15 @@ const { insertDefaultValues } = require('./dbInsert');  // Importa os valores pa
         for (const table of Object.keys(insertDefaultValues)) {
             await con.query(insertDefaultValues[table]);
             console.log(`Valores padrões inseridos em ${table}`);
+        }
+
+        for (const table of Object.keys(insertDefaulConditions)) {
+            await con.query(insertDefaulConditions[table]);
+            console.log(`condicoes padrões inseridos em ${table}`);
+        }
+        for (const table of Object.keys(insertDefaultUser)) {
+            await con.query(insertDefaultUser[table]);
+            console.log(`usuarios padrões inseridos em ${table}`);
         }
 
         // Criar banco de dados 'lgpd_removed_users' e tabela 'users'
