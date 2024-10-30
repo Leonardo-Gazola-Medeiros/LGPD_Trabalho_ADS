@@ -217,6 +217,28 @@ const Home: React.FC = () => {
       })
       .catch(error => console.error('Erro ao enviar consentimento:', error));
   };
+  const retrieveData = () => {
+    // Cria um objeto com os dados do usuário e as mensagens
+    const dataToDownload = {
+      user: {
+        id: userId,
+        username: username,
+      },
+      messages: messages,
+    };
+
+    const dataStr = JSON.stringify(dataToDownload, null, 2); // Formata as informações em JSON
+    const blob = new Blob([dataStr], { type: 'application/json' }); // Cria um blob com o conteúdo
+    const url = URL.createObjectURL(blob); // Cria uma URL para o blob
+
+    const a = document.createElement('a'); // Cria um link
+    a.href = url; // Define a URL do link
+    a.download = 'dados_usuario_e_historico.json'; // Define o nome do arquivo para download
+    document.body.appendChild(a); // Adiciona o link ao corpo
+    a.click(); // Simula o clique no link
+    document.body.removeChild(a); // Remove o link após o download
+    URL.revokeObjectURL(url); // Libera a URL do blob
+  };
   
 
   return (
@@ -225,6 +247,9 @@ const Home: React.FC = () => {
         <h2>{username}</h2>
         <button type="button" onClick={handleDeleteAccount} className="deleteButton">
           Deletar minha conta
+        </button>
+        <button onClick={retrieveData}>
+          recuperar meus dados
         </button>
         <button type='button' onClick={handleSettings} className='settings'>
           Settings
