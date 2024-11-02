@@ -1,5 +1,7 @@
 //IMPORT REQUIREMENTS
 require('dotenv').config();
+require('./connect/dbCreate');
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
@@ -38,6 +40,8 @@ app.use(cors({
 }));
 app.set('view engine', 'ejs');
 app.use(cookieParser());
+
+
 
 // COOKIES
 //app.use(session({
