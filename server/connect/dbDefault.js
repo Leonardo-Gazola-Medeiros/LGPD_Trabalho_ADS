@@ -1,6 +1,6 @@
 const createTableQueries = {
   users: `
-      CREATE TABLE users (
+      CREATE TABLE users if not exists (
       id INT PRIMARY KEY AUTO_INCREMENT,
       username VARCHAR(255),
       senha VARCHAR(255),
@@ -9,7 +9,7 @@ const createTableQueries = {
   `,
 
   mensagens: `
-      CREATE TABLE mensagens (
+      CREATE TABLE mensagens if not exists  (
       data TIMESTAMP,
       mensagem VARCHAR(300),
       id_user INT
@@ -17,14 +17,14 @@ const createTableQueries = {
   `,
 
   termos: `
-    CREATE TABLE termos (
+    CREATE TABLE termos  if not exists (
     version INT PRIMARY KEY AUTO_INCREMENT,
     texto LONGTEXT
 );
   `,
 
   condicoes: `
-      CREATE TABLE condicoes (
+      CREATE TABLE condicoes if not exists  (
       id_condicao INT PRIMARY KEY AUTO_INCREMENT,
       version_id INT,
       nome LONGTEXT,
@@ -33,11 +33,24 @@ const createTableQueries = {
   `,
 
   aceites: `
-      CREATE TABLE aceites (
+      CREATE TABLE aceites if not exists  (
       id_user INT,
       id_condicao INT,
       aceite BOOL
       );
+  `,
+
+
+  usuario_termo: `
+  CREATE TABLE IF NOT EXISTS usuario_termo (
+    id_user INT,
+    id_termo INT,
+    aceito BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (id_user, id_termo),
+    FOREIGN KEY (id_user) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_termo) REFERENCES termos(version) ON DELETE CASCADE
+);
+
   `
 };
 
@@ -65,7 +78,21 @@ const createForeignKeys = {
   `
 };
 
-module.exports = { createTableQueries, createForeignKeys };
+
+const createTriggers = {
+  termoUsuarioTrigger: `
+
+CREATE TRIGGER if not exists after_termo_insert
+AFTER INSERT ON termos
+FOR EACH ROW
+BEGIN
+    INSERT INTO usuario_termo (id_user, id_termo, aceito)
+    SELECT id, NEW.version, FALSE FROM users;
+END 
+`
+}
+
+module.exports = { createTableQueries, createForeignKeys, createTriggers };
 
 /*
 
