@@ -2,15 +2,15 @@ const con = require('../connect/dbconnect')
 
 // --------- FUNÇÕES DO TERMO ---------- //
 
-exports.InsertTerm = async (req,res) => {
-    const {version,texto} = req.body;
+exports.InsertTerm = async (req, res) => {
+    const { version, texto } = req.body;
     const query = 'INSERT INTO termos (version,texto) VALUES (?,?)'
-    con.query(query,[version,texto],(error,results) => {
-        if(error){
+    con.query(query, [version, texto], (error, results) => {
+        if (error) {
             console.error("Error inserting term: ", error);
-            return res.status(500).json({error:'Database error: ' + error.message})
+            return res.status(500).json({ error: 'Database error: ' + error.message })
         }
-        res.status(201).json({id:results.insertId})
+        res.status(201).json({ id: results.insertId })
     })
 };
 
@@ -32,32 +32,32 @@ exports.getAllConditions = async (req, res) => {
     con.query(query, (error, results) => {
         if (error) {
             console.error("Erro na busca das condições: ", error);
-            return res.status(500).json({error: 'Database error: ' + error.message});
+            return res.status(500).json({ error: 'Database error: ' + error.message });
         }
         res.status(200).json(results);
     });
 };
 
 exports.InsertCondition = async (req, res) => {
-    const {version_id,nome,obrigatorio} = req.body;
+    const { version_id, nome, obrigatorio } = req.body;
     const query = 'INSERT INTO condicoes (version_id, nome, obrigatorio) VALUES (?,?,?)'
-    con.query(query[version_id,nome,obrigatorio], (error,results) => {
-        if(error){
+    con.query(query[version_id, nome, obrigatorio], (error, results) => {
+        if (error) {
             console.error("Error inserting term: ", error);
-            return res.status(500).json({error:'Database error: ' + error.message})
+            return res.status(500).json({ error: 'Database error: ' + error.message })
         }
-        res.status(201).json({id:results.insertId})
+        res.status(201).json({ id: results.insertId })
     });
 };
 
 // --------- FUNÇÕES DOS ACEITES DO USUARIO --------- //
 
-exports.getAceites = async (req,res) => {
+exports.getAceites = async (req, res) => {
     const query = 'SELECT * FROM condicoes WHERE id_user = ? AND WHERE id_condicao = (WHERE condicoes.version_id MAX)'
     con.query(query, (error, results) => {
         if (error) {
             console.error("Erro na busca dos termos do usuario: ", error);
-            return res.status(500).json({error: 'Database error: ' + error.message});
+            return res.status(500).json({ error: 'Database error: ' + error.message });
         }
         res.status(200).json(results);
     });
@@ -65,13 +65,40 @@ exports.getAceites = async (req,res) => {
 
 
 exports.insertAceites = async (req, res) => {
-    const {id_user, id_condicao, aceite} = req.body;
-    const query = 'INSERT INTO condicoes (id_user, id_condicao, aceite) VALUES (?,?,?)'
-    con.query(query[id_user, id_condicao, aceite], (error,results) => {
-        if(error){
+    const { id_user, id_condicao, aceite } = req.body;
+    const query = `INSERT INTO condicoes (id_user, id_condicao, aceite) VALUES (?,?,?);`
+    con.query(query[id_user, id_condicao, aceite], (error, results) => {
+        if (error) {
             console.error("Error inserindo os aceites do usuario: ", error);
-            return res.status(500).json({error:'Database error: ' + error.message})
+            return res.status(500).json({ error: 'Database error: ' + error.message })
         }
-        res.status(201).json({id:results.insertId})
+        res.status(201).json({ id: results.insertId })
     });
+};
+
+
+
+exports.getUsuarioTermos = async (req, res) => {
+    const { id_user } = req.body;
+    const query = 'SELECT * FROM usuario_termo WHERE id_user = ? order BY id_termo DESC LIMIT 1;';
+    con.query(query, [id_user], (error, results) => {
+        if (error) {
+            console.error("Error when getting terms: ", error);
+            return res.status(500).json({ error: 'Database error: ' + error.message });
+        }
+        res.status(200).json(results);
+    });
+};
+
+exports.AcceptLatestTerms = async (req, res) => {
+    const { id_user } = req.body;
+    const { id_term } = req.body;
+    const query = 'UPDATE usuario_termo SET aceite = 1 WHERE id_user = ? AND id_termo = ?';
+    con.query(query, [id_user, id_term], (error, results) => {
+        if (error) {
+            console.error("Error when getting terms: ", error);
+            return res.status(500).json({ error: 'Database error: ' + error.message });
+        }
+        res.status(200).json(results);
+    })
 };

@@ -18,5 +18,8 @@ router.get('/cond', termController.getAllConditions);
 
 router.post('/acc', termController.insertAceites);
 router.get('/acc', termController.getAceites);
+router.get('/acc/:id', termController.getUsuarioTermos);
+router.post('/acc/:id', termController.AcceptLatestTerms);
+
 
 module.exports = router

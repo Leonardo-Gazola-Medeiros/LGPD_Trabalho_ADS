@@ -19,52 +19,69 @@ const Home: React.FC = () => {
   const [userId, setUserId] = useState<number | null>(null);
   const [openSettings, setOpenSettings] = useState(false);
   const [openTermsUpdate, setOpenTermsUpdate] = useState(false);
+  const [ultimoTermoAceito, setUltimoTermoAceito] = useState<boolean>(true);
   const [openTerms, setOpenTerms] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
 
-  const [termsText, setTermsText] = useState<string>('');  
+  const [termsText, setTermsText] = useState<string>('');
   const [tempTermsText, setTempTermsText] = useState<string>('');  // Valor temporário para os termos
   const [initialTermsText, setInitialTermsText] = useState<string>(''); // Valor inicial para restaurar
 
   useEffect(() => {
-    if (!document.cookie) {
-      window.location.href = '/login';
-    }
-
-    const getCookieValue = (name: string) => {
-      const cookies = document.cookie.split('; ');
-      const cookie = cookies.find(cookie => cookie.startsWith(`${name}=`));
-
-      if (cookie) {
-        return decodeURIComponent(cookie.split('=')[1]);
+    const fetchData = async () => {
+      if (!document.cookie) {
+        window.location.href = '/login';
       }
 
-      return null;
+      const getLatestTermById = async () => {
+        try {
+          const response = await axios.get(`http://localhost:3000/term/acc/${userId}`);
+          const terms = response.data;
+          const latestTerm = terms[0];
+          setUltimoTermoAceito(latestTerm.aceito === 1);
+          setTermsText(latestTerm.texto);
+          setInitialTermsText(latestTerm.texto);
+        } catch (error) {
+          console.error('Error fetching latest term:', error);
+        }
+      };
+
+      const getCookieValue = (name: string) => {
+        const cookies = document.cookie.split('; ');
+        const cookie = cookies.find(cookie => cookie.startsWith(`${name}=`));
+        return cookie ? decodeURIComponent(cookie.split('=')[1]) : null;
+      };
+
+      await getLatestTermById();
+      const userIdFromCookie = getCookieValue('userId');
+      const usernameFromCookie = getCookieValue('username');
+
+      if (userIdFromCookie && usernameFromCookie) {
+        setUserId(Number(userIdFromCookie));
+        setUsername(usernameFromCookie);
+      } else {
+        console.error('User is not logged in');
+        window.location.href = '/login';
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/msg');
+        const data = await response.json();
+        setMessages(data);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+
+      const termsFromLocalStorage = localStorage.getItem("terms");
+      if (termsFromLocalStorage) {
+        const parsedTerms = JSON.parse(termsFromLocalStorage);
+        setTermsText(parsedTerms[0].texto);
+        setInitialTermsText(parsedTerms[0].texto);
+      }
     };
 
-    const userIdFromCookie = getCookieValue('userId');
-    const usernameFromCookie = getCookieValue('username');
-
-    if (userIdFromCookie && usernameFromCookie) {
-      setUserId(Number(userIdFromCookie));
-      setUsername(usernameFromCookie);
-    } else {
-      console.error('User is not logged in');
-      window.location.href = '/login';
-    }
-
-    fetch('http://localhost:3000/msg')
-      .then(response => response.json())
-      .then(data => setMessages(data))
-      .catch(error => console.error('Error fetching messages:', error));
-
-    const termsFromLocalStorage = localStorage.getItem("terms");
-    if (termsFromLocalStorage) {
-      const parsedTerms = JSON.parse(termsFromLocalStorage);
-      setTermsText(parsedTerms[0].texto); // Carrega o termo salvo ao iniciar
-      setInitialTermsText(parsedTerms[0].texto); // Salva o valor inicial para poder restaurar
-    }
+    fetchData();
   }, []);
-
   const handleSendMessage = () => {
     if (newMessage.trim() !== '' && userId) {
       const messagePayload = {
@@ -117,17 +134,17 @@ const Home: React.FC = () => {
   };
 
   const handleSaveTerms = () => {
-    if(!window.confirm("Tem certeza que deseja alterar os termos de uso?")){
+    if (!window.confirm("Tem certeza que deseja alterar os termos de uso?")) {
       setOpenTermsUpdate(false);
       setOpenSettings(true);
       return;
     }
 
-  
-  
+
+
     const updatedTerms = { texto: tempTermsText };
     localStorage.setItem("terms", JSON.stringify([updatedTerms]));
-  
+
     fetch('http://localhost:3000/term', {
       method: 'POST',
       headers: {
@@ -135,16 +152,16 @@ const Home: React.FC = () => {
       },
       body: JSON.stringify(updatedTerms),
     })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      alert("Termos atualizados com sucesso!");
-      setTermsText(tempTermsText);
-      setOpenTermsUpdate(false);
-      setOpenSettings(true);
-    })
-    .catch(error => console.error('Erro ao atualizar termos:', error));
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        alert("Termos atualizados com sucesso!");
+        setTermsText(tempTermsText);
+        setOpenTermsUpdate(false);
+        setOpenSettings(true);
+      })
+      .catch(error => console.error('Erro ao atualizar termos:', error));
   };
 
   const handleSettings = () => {
@@ -162,7 +179,7 @@ const Home: React.FC = () => {
     // Desmarca todas as checkboxes
     const checkboxes = document.querySelectorAll('.check_consent');
     checkboxes.forEach((checkbox) => checkbox.checked = false);
-  
+
     // Prepara os dados para enviar
     const consentData = {
       info_dispositivo: false,
@@ -171,7 +188,7 @@ const Home: React.FC = () => {
       usar_perfis_anuncios: false,
       desenvolver_servicos: false
     };
-  
+
     // Faz a requisição para o servidor
     fetch('http://localhost:3000/acc', {
       method: 'POST',
@@ -189,7 +206,7 @@ const Home: React.FC = () => {
       })
       .catch(error => console.error('Erro ao enviar consentimento:', error));
   };
-  
+
   const handleSaveAndExit = () => {
     // Pega o status de todas as checkboxes
     const consentData = {
@@ -199,7 +216,7 @@ const Home: React.FC = () => {
       usar_perfis_anuncios: document.querySelector('input[name="usar_perfis_anuncios"]'),
       desenvolver_servicos: document.querySelector('input[name="desenvolver_servicos"]'),
     };
-  
+
     // Faz a requisição para o servidor com os dados selecionados
     fetch('http://localhost:3000/acc', {
       method: 'POST',
@@ -239,7 +256,20 @@ const Home: React.FC = () => {
     document.body.removeChild(a); // Remove o link após o download
     URL.revokeObjectURL(url); // Libera a URL do blob
   };
-  
+
+
+  async function handleLastTermAccept() {
+
+    const ultimoTermo = JSON.parse(localStorage.getItem("terms") || "[]")[0];
+
+    const response = await axios.post(`http://localhost:3000/terms/acc/${userId}`, {
+      id_user: userId,
+      id_term: ultimoTermo.version
+    })
+
+    console.log(response)
+  }
+
 
   return (
     <div className="home-container">
@@ -380,7 +410,7 @@ const Home: React.FC = () => {
             </Button>
           </div>
         </Box>
-      </Modal > 
+      </Modal >
 
       <Modal
         className='modal_container'
@@ -389,26 +419,47 @@ const Home: React.FC = () => {
         aria-labelledby="update-terms-title"
         aria-describedby="update-terms-description"
       >
-        <Box className="modalBox" style={{ width: '600px', padding: '20px' }}> 
+        <Box className="modalBox" style={{ width: '600px', padding: '20px' }}>
           <div className='modal_title'>
             <h1>Termos</h1>
           </div>
-          <Typography style={{textAlign: 'justify'}}>
-              {tempTermsText}
+          <Typography style={{ textAlign: 'justify' }}>
+            {tempTermsText}
           </Typography>
           <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => {
-                setOpenTerms(false);
-                setOpenSettings(true);
-                setTempTermsText(tempTermsText);
-              }}
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              setOpenTerms(false);
+              setOpenSettings(true);
+              setTempTermsText(tempTermsText);
+            }}
           >
             Fechar
           </Button>
         </Box>
       </Modal>
+
+      {ultimoTermoAceito == false && (
+
+        <Modal
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box className='modalBox'>
+            <Typography id="modal-modal-title" variant="h4" component="h2">
+              Termo de consentimento
+            </Typography>
+            <Typography id="modal-modal-description" sx={{ my: 4 }}>
+              {JSON.parse(localStorage.getItem("terms") || "[]")[0].texto}
+            </Typography>
+            <button onClick={handleLastTermAccept}>Eu concordo</button>
+            <button className='cancelButton' onClick={redirectLogin}>Não concordo</button>
+          </Box>
+        </Modal>
+      )}
 
     </div>
   );
