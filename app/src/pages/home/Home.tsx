@@ -31,7 +31,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!document.cookie) {
-        redirectLogin();
+        //redirectLogin();
       }
 
       const getLatestTermById = async () => {
@@ -62,7 +62,7 @@ const Home: React.FC = () => {
         setUsername(usernameFromCookie);
       } else {
         console.error('User is not logged in');
-        redirectLogin();
+        //redirectLogin();
       }
 
       try {
@@ -128,7 +128,7 @@ const Home: React.FC = () => {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           alert('Conta deletada com sucesso!');
-          redirectLogin();
+          //redirectLogin();
         })
         .catch(error => console.error('Erro ao deletar conta:', error));
     }
