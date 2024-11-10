@@ -29,6 +29,17 @@ const insertDefaultUser = {
     `
 }
 
+const insertDefaultUserPermissions = {
+    permissions: `
+        INSERT INTO usuario_termo(id_user,id_termo,aceito)
+        VALUES
+        (1,1,1),
+        (2,1,1),
+        (3,1,1),
+        (4,1,1)
+    `
+}
 
 
-module.exports = { insertDefaultValues, insertDefaulConditions, insertDefaultUser }
+
+module.exports = { insertDefaultValues, insertDefaulConditions, insertDefaultUser, insertDefaultUserPermissions }

@@ -3,6 +3,7 @@ import './HomePage.css';
 import axios from 'axios';
 import { Button, Modal, TextareaAutosize } from '@mui/material';
 import { Box, Typography } from '@mui/material';
+import { redirect } from 'react-router-dom';
 
 interface Message {
   username: string;
@@ -30,7 +31,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!document.cookie) {
-        window.location.href = '/login';
+        redirectLogin();
       }
 
       const getLatestTermById = async () => {
@@ -61,7 +62,7 @@ const Home: React.FC = () => {
         setUsername(usernameFromCookie);
       } else {
         console.error('User is not logged in');
-        window.location.href = '/login';
+        redirectLogin();
       }
 
       try {

@@ -81,14 +81,13 @@ const createForeignKeys = {
 
 const createTriggers = {
   termoUsuarioTrigger: `
-
-CREATE TRIGGER IF NOT EXISTS after_termo_insert
-AFTER INSERT ON termos
-FOR EACH ROW
-BEGIN
-    INSERT INTO usuario_termo (id_user, id_termo, aceito)
-    SELECT id, NEW.version, FALSE FROM users;
-END 
+    CREATE TRIGGER IF NOT EXISTS after_termo_insert
+    AFTER INSERT ON termos
+    FOR EACH ROW
+    BEGIN
+        INSERT INTO usuario_termo (id_user, id_termo, aceito)
+        SELECT id, NEW.version, FALSE FROM users;
+    END 
 `
 }
 

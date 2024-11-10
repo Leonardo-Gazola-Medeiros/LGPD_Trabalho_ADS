@@ -1,6 +1,6 @@
-const mysql = require('mysql2/promise');  // Usando o módulo 'promise' para trabalhar com async/await
+const mysql = require('mysql2/promise');
 const { createTableQueries, createForeignKeys, createTriggers } = require('./dbDefault');
-const { insertDefaultValues, insertDefaulConditions, insertDefaultUser } = require('./dbInsert');  // Importa os valores padrões a serem inseridos
+const { insertDefaultValues, insertDefaulConditions, insertDefaultUser, insertDefaultUserPermissions } = require('./dbInsert');
 
 (async () => {
     try {
@@ -18,7 +18,6 @@ const { insertDefaultValues, insertDefaulConditions, insertDefaultUser } = requi
         const [rows] = await con.query("SHOW TABLES");
         const tables = rows.map(row => Object.values(row)[0]);
 
-        // Função para criar tabelas se elas não existirem
         const createTableIfNotExists = async (tableName, createQuery) => {
             if (!tables.includes(tableName)) {
                 if (createQuery) {
@@ -32,7 +31,7 @@ const { insertDefaultValues, insertDefaulConditions, insertDefaultUser } = requi
             }
         };
 
-        // Iterar sobre as queries de criação de tabelas
+        // Criar tabelas
         for (const tableName of Object.keys(createTableQueries)) {
             const createQuery = createTableQueries[tableName];
             await createTableIfNotExists(tableName, createQuery);
@@ -46,24 +45,27 @@ const { insertDefaultValues, insertDefaulConditions, insertDefaultUser } = requi
             console.log(`${fkName} criada com sucesso`);
         }
 
-        // Inserir valores padrões
-        for (const table of Object.keys(insertDefaultValues)) {
-            await con.query(insertDefaultValues[table]);
-            console.log(`Valores padrões inseridos em ${table}`);
-        }
+        // Função para verificar e inserir valores padrão
+        const insertIfEmpty = async (tableName, insertQuery) => {
+            const [result] = await con.query(`SELECT COUNT(*) AS count FROM ${tableName}`);
+            if (result[0].count === 0) {
+                await con.query(insertQuery);
+                console.log(`Valores padrões inseridos em ${tableName}`);
+            } else {
+                console.log(`Valores já existentes em ${tableName}, inserção ignorada`);
+            }
+        };
 
-        for (const table of Object.keys(insertDefaulConditions)) {
-            await con.query(insertDefaulConditions[table]);
-            console.log(`condicoes padrões inseridos em ${table}`);
-        }
-        for (const table of Object.keys(insertDefaultUser)) {
-            await con.query(insertDefaultUser[table]);
-            console.log(`usuarios padrões inseridos em ${table}`);
-        }
+        // Inserir valores padrões nas tabelas
+        await insertIfEmpty('termos', insertDefaultValues.termos);
+        await insertIfEmpty('condicoes', insertDefaulConditions.conditions);
+        await insertIfEmpty('users', insertDefaultUser.users);
+        await insertIfEmpty('usuario_termo', insertDefaultUserPermissions.permissions);
 
+        // Criar triggers
         for (const trigger of Object.keys(createTriggers)) {
             await con.query(createTriggers[trigger]);
-            console.log(`trigger padrões inseridos em ${trigger}`);
+            console.log(`Trigger ${trigger} criada com sucesso`);
         }
 
         // Criar banco de dados 'lgpd_removed_users' e tabela 'users'
@@ -72,7 +74,7 @@ const { insertDefaultValues, insertDefaulConditions, insertDefaultUser } = requi
         await createTableIfNotExists("users", "CREATE TABLE users (id INT PRIMARY KEY AUTO_INCREMENT, email VARCHAR(200))");
         console.log("Estrutura padrão do banco de dados 'lgpd_removed_users' criada");
 
-        await con.end();  // Fechar a conexão no final de todas as operações
+        await con.end();
     } catch (err) {
         console.error("Erro:", err);
     }
