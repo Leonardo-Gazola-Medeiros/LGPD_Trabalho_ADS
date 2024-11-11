@@ -23,6 +23,7 @@ const Home: React.FC = () => {
   const [ultimoTermoAceito, setUltimoTermoAceito] = useState<boolean>(true);
   const [openTerms, setOpenTerms] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [ultimoTermoId, setUltimoTermoId] = useState<number | null>(null);
 
   const [termsText, setTermsText] = useState<string>('');
   const [tempTermsText, setTempTermsText] = useState<string>('');  // Valor temporário para os termos
@@ -34,20 +35,6 @@ const Home: React.FC = () => {
         redirectLogin();
       }
 
-      const getLatestTermById = async () => {
-        try {
-          const response = await axios.get(`http://localhost:3000/term/acc/${userId}`);
-          const terms = response.data;
-          const latestTerm = terms[0];
-          setUltimoTermoAceito(latestTerm.aceito === 1);
-          setTermsText(latestTerm.texto);
-          setInitialTermsText(latestTerm.texto);
-        } catch (error) {
-          console.error('Error fetching latest term:', error);
-        }
-      };
-
-      await getLatestTermById();
       const userIdFromCookie = getCookieValue('userId');
       const usernameFromCookie = getCookieValue('username');
 
@@ -78,7 +65,31 @@ const Home: React.FC = () => {
     fetchData();
   }, []);
 
-  
+  useEffect(() => {
+
+    const getLatestTermById = async () => {
+      try {
+        console.log("userId:", userId);
+        const response = await axios.get(`http://localhost:3000/term/acc/${userId}`);
+        const terms = response.data;
+        const latestTerm = terms[0];
+        console.log(latestTerm.aceito === 1);
+        setUltimoTermoId(latestTerm.id_termo);
+        setUltimoTermoAceito(latestTerm.aceito === 1);
+        setTermsText(latestTerm.texto);
+        setInitialTermsText(latestTerm.texto);
+        
+      } catch (error) {
+        console.error('Error fetching latest term:', error);
+      }
+    };
+
+    if (userId !== null) {
+      getLatestTermById();
+    }
+  }, [userId]);
+
+
   const getCookieValue = (name: string) => {
     const cookies = document.cookie.split('; ');
     const cookie = cookies.find(cookie => cookie.startsWith(`${name}=`));
@@ -262,17 +273,14 @@ const Home: React.FC = () => {
 
 
   async function handleLastTermAccept() {
-
-    const ultimoTermo = JSON.parse(localStorage.getItem("terms") || "[]")[0];
-
-    const response = await axios.post(`http://localhost:3000/terms/acc/${userId}`, {
-      id_user: userId,
-      id_term: ultimoTermo.version
-    })
+    console.log(ultimoTermoId)
+    const response = await axios.post(`http://localhost:3000/term/acc/${userId}`, {
+      id_term: ultimoTermoId,
+    });
 
     console.log(response)
   }
-
+  console.log(ultimoTermoAceito)
   return (
     <div className="home-container">
       <div className="column user-column">
@@ -443,9 +451,8 @@ const Home: React.FC = () => {
       </Modal>
 
       {ultimoTermoAceito == false && (
-
         <Modal
-          open={openModal}
+          open={!ultimoTermoAceito}
           onClose={() => setOpenModal(false)}
           aria-labelledby="modal-modal-title"
           aria-describedby="modal-modal-description"

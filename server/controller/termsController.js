@@ -79,26 +79,29 @@ exports.insertAceites = async (req, res) => {
 
 
 exports.getUsuarioTermos = async (req, res) => {
-    const { id_user } = req.body;
+    const  {id}  = req.params;
     const query = 'SELECT * FROM usuario_termo WHERE id_user = ? order BY id_termo DESC LIMIT 1;';
-    con.query(query, [id_user], (error, results) => {
+    con.query(query, [id], (error, results) => {
         if (error) {
             console.error("Error when getting terms: ", error);
             return res.status(500).json({ error: 'Database error: ' + error.message });
         }
+        console.log(id);
         res.status(200).json(results);
     });
 };
 
 exports.AcceptLatestTerms = async (req, res) => {
-    const { id_user } = req.body;
+    const { user_id } = req.params;
     const { id_term } = req.body;
-    const query = 'UPDATE usuario_termo SET aceite = 1 WHERE id_user = ? AND id_termo = ?';
-    con.query(query, [id_user, id_term], (error, results) => {
+    const query = 'UPDATE usuario_termo SET aceito = 1 WHERE id_user = ? AND id_termo = ?';
+    con.query(query, [user_id, id_term], (error, results) => {
         if (error) {
             console.error("Error when getting terms: ", error);
             return res.status(500).json({ error: 'Database error: ' + error.message });
         }
+
+        console.log();
         res.status(200).json(results);
     })
 };
