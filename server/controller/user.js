@@ -57,7 +57,7 @@ exports.loginUser = async (req, res) => {
             .cookie("userId", user.id)
             .cookie("username", user.username)
             .status(200)
-            .json({ message: "Login successful" });
+            .send({ message: "Login successful" });
 
         } else {
           res.status(401).json({ error: 'Invalid email or password' });

@@ -1,6 +1,6 @@
 const createTableQueries = {
   users: `
-      CREATE TABLE users if not exists (
+      CREATE TABLE IF NOT EXISTS users (
       id INT PRIMARY KEY AUTO_INCREMENT,
       username VARCHAR(255),
       senha VARCHAR(255),
@@ -9,7 +9,7 @@ const createTableQueries = {
   `,
 
   mensagens: `
-      CREATE TABLE mensagens if not exists  (
+      CREATE TABLE IF NOT EXISTS mensagens (
       data TIMESTAMP,
       mensagem VARCHAR(300),
       id_user INT
@@ -17,14 +17,14 @@ const createTableQueries = {
   `,
 
   termos: `
-    CREATE TABLE termos  if not exists (
+    CREATE TABLE IF NOT EXISTS termos (
     version INT PRIMARY KEY AUTO_INCREMENT,
     texto LONGTEXT
 );
   `,
 
   condicoes: `
-      CREATE TABLE condicoes if not exists  (
+      CREATE TABLE IF NOT EXISTS condicoes (
       id_condicao INT PRIMARY KEY AUTO_INCREMENT,
       version_id INT,
       nome LONGTEXT,
@@ -33,7 +33,7 @@ const createTableQueries = {
   `,
 
   aceites: `
-      CREATE TABLE aceites if not exists  (
+      CREATE TABLE IF NOT EXISTS aceites (
       id_user INT,
       id_condicao INT,
       aceite BOOL
@@ -81,14 +81,13 @@ const createForeignKeys = {
 
 const createTriggers = {
   termoUsuarioTrigger: `
-
-CREATE TRIGGER if not exists after_termo_insert
-AFTER INSERT ON termos
-FOR EACH ROW
-BEGIN
-    INSERT INTO usuario_termo (id_user, id_termo, aceito)
-    SELECT id, NEW.version, FALSE FROM users;
-END 
+    CREATE TRIGGER IF NOT EXISTS after_termo_insert
+    AFTER INSERT ON termos
+    FOR EACH ROW
+    BEGIN
+        INSERT INTO usuario_termo (id_user, id_termo, aceito)
+        SELECT id, NEW.version, FALSE FROM users;
+    END 
 `
 }
 
