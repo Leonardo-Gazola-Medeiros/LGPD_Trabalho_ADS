@@ -61,6 +61,7 @@ const { insertDefaultValues, insertDefaulConditions, insertDefaultUser, insertDe
         await insertIfEmpty('condicoes', insertDefaulConditions.conditions);
         await insertIfEmpty('users', insertDefaultUser.users);
         await insertIfEmpty('usuario_termo', insertDefaultUserPermissions.permissions);
+        await insertIfEmpty('aceites', insertDefaultUserPermissions.aceites);
 
         // Criar triggers
         for (const trigger of Object.keys(createTriggers)) {

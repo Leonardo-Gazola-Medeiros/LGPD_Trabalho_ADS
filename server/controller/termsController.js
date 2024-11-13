@@ -65,17 +65,52 @@ exports.getAceites = async (req, res) => {
 
 
 exports.insertAceites = async (req, res) => {
-    const { id_user, id_condicao, aceite } = req.body;
-    const query = `INSERT INTO condicoes (id_user, id_condicao, aceite) VALUES (?,?,?);`
-    con.query(query[id_user, id_condicao, aceite], (error, results) => {
-        if (error) {
-            console.error("Error inserindo os aceites do usuario: ", error);
-            return res.status(500).json({ error: 'Database error: ' + error.message })
-        }
-        res.status(201).json({ id: results.insertId })
-    });
-};
-
+    console.log('Iniciando update');
+    
+    const {
+      info_dispositivo,
+      dados_usuario,
+      perfis_anuncio_personalizado,
+      usar_perfis_anuncios,
+      desenvolver_servicos,
+    } = req.body;
+    
+    const id_user = req.params.user_id; // Pegando o ID do usuário da URL
+  
+    const consentArray = [
+      { id_condicao: 1, aceite: info_dispositivo },
+      { id_condicao: 2, aceite: dados_usuario },
+      { id_condicao: 3, aceite: perfis_anuncio_personalizado },
+      { id_condicao: 4, aceite: usar_perfis_anuncios },
+      { id_condicao: 5, aceite: desenvolver_servicos },
+    ];
+  
+    // Loop para atualizar cada item individualmente
+    for (const consent of consentArray) {
+      const query = `
+        UPDATE aceites 
+        SET aceite = ? 
+        WHERE id_user = ? AND id_condicao = ?
+      `;
+      
+      // Executa a query para cada condição
+      await new Promise((resolve, reject) => {
+        con.query(
+          query,
+          [consent.aceite, id_user, consent.id_condicao],
+          (error, results) => {
+            if (error) {
+              console.error('Erro ao atualizar os aceites:', error);
+              return reject(error);
+            }
+            resolve(results);
+          }
+        );
+      });
+    }
+  
+    res.status(200).json({ message: 'Consentimentos atualizados com sucesso' });
+  };
 
 
 exports.getUsuarioTermos = async (req, res) => {

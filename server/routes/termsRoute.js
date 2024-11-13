@@ -16,7 +16,7 @@ router.get('/cond', termController.getAllConditions);
 
 // ----------- ROTA PARA OS ACEITES DAS CONDIÇÕES ----------- //
 
-router.post('/acc', termController.insertAceites);
+router.post('/acc/update/:user_id', termController.insertAceites);
 router.get('/acc', termController.getAceites);
 router.get('/acc/:id', termController.getUsuarioTermos);
 router.post('/acc/:user_id', termController.AcceptLatestTerms);

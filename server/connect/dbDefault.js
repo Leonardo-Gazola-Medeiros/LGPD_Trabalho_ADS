@@ -88,7 +88,18 @@ const createTriggers = {
         INSERT INTO usuario_termo (id_user, id_termo, aceito)
         SELECT id, NEW.version, FALSE FROM users;
     END 
-`
+`,
+
+  aceiteUsuarioTrigger: `
+  
+    CREATE TRIGGER IF NOT EXISTS after_condicao_insert
+    AFTER INSERT ON condicoes
+    FOR EACH ROW
+    BEGIN
+      INSERT INTO aceites (id_user, id_condicao, aceite)
+      SELECT id, NEW.id_condicao, FALSE FROM users;
+    END
+  `
 }
 
 module.exports = { createTableQueries, createForeignKeys, createTriggers };

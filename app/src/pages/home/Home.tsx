@@ -224,30 +224,31 @@ const Home: React.FC = () => {
   const handleSaveAndExit = () => {
     // Pega o status de todas as checkboxes
     const consentData = {
-      info_dispositivo: document.querySelector('input[name="info_dispositivo"]'),
-      dados_usuario: document.querySelector('input[name="dados_usuario"]'),
-      perfis_anuncio_personalizado: document.querySelector('input[name="perfis_anuncio_personalizado"]'),
-      usar_perfis_anuncios: document.querySelector('input[name="usar_perfis_anuncios"]'),
-      desenvolver_servicos: document.querySelector('input[name="desenvolver_servicos"]'),
+      info_dispositivo: (document.querySelector('input[name="info_dispositivo"]') as HTMLInputElement)?.checked || false,
+      dados_usuario: (document.querySelector('input[name="dados_usuario"]') as HTMLInputElement)?.checked || false,
+      perfis_anuncio_personalizado: (document.querySelector('input[name="perfis_anuncio_personalizado"]') as HTMLInputElement)?.checked || false,
+      usar_perfis_anuncios: (document.querySelector('input[name="usar_perfis_anuncios"]') as HTMLInputElement)?.checked || false,
+      desenvolver_servicos: (document.querySelector('input[name="desenvolver_servicos"]') as HTMLInputElement)?.checked || false,
     };
-
+    
     // Faz a requisição para o servidor com os dados selecionados
-    fetch('http://localhost:3000/acc', {
-      method: 'POST',
+    fetch(`http://localhost:3000/term/acc/update/${userId}`, {
+      method: 'POST', // Mudança de POST para PUT
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(consentData),
     })
-      .then(response => {
+      .then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        alert("Consentimento salvo com sucesso.");
-        setOpenSettings(false); // Fecha o modal
+        alert('Consentimento atualizado com sucesso.');
       })
-      .catch(error => console.error('Erro ao enviar consentimento:', error));
+      .catch((error) => console.error('Erro ao enviar consentimento:', error));
   };
+
+
   const retrieveData = () => {
     // Cria um objeto com os dados do usuário e as mensagens
     const dataToDownload = {
@@ -348,25 +349,50 @@ const Home: React.FC = () => {
           </p>
           <div className='divisor'></div>
           <div>
-            <div className='opcoes_consent'>
-              <div className='texto_consent'>Armazenar informações do dispositivo</div>
-              <input className='check_consent' id='desenvolver_servicos' type="checkbox" role='switch' name="info_dispositivo" />
+            <div className="opcoes_consent">
+              <div className="texto_consent">Armazenar informações do dispositivo</div>
+              <input
+                className="check_consent"
+                type="checkbox"
+                role="switch"
+                name="info_dispositivo"
+              />
             </div>
-            <div className='opcoes_consent'>
-              <div className='texto_consent'>Uso dos dados do usuário</div>
-              <input className='check_consent' type="checkbox" role='switch' name="info_dispositivo" />
+            <div className="opcoes_consent">
+              <div className="texto_consent">Uso dos dados do usuário</div>
+              <input
+                className="check_consent"
+                type="checkbox"
+                role="switch"
+                name="dados_usuario"
+              />
             </div>
-            <div className='opcoes_consent'>
-              <div className='texto_consent'>Criar perfis de anuncio personalizado</div>
-              <input className='check_consent' type="checkbox" role='switch' name="info_dispositivo" />
+            <div className="opcoes_consent">
+              <div className="texto_consent">Criar perfis de anuncio personalizado</div>
+              <input
+                className="check_consent"
+                type="checkbox"
+                role="switch"
+                name="perfis_anuncio_personalizado"
+              />
             </div>
-            <div className='opcoes_consent'>
-              <div className='texto_consent'>Usar perfis para anuncios personalizados</div>
-              <input className='check_consent' type="checkbox" role='switch' name="info_dispositivo" />
+            <div className="opcoes_consent">
+              <div className="texto_consent">Usar perfis para anuncios personalizados</div>
+              <input
+                className="check_consent"
+                type="checkbox"
+                role="switch"
+                name="usar_perfis_anuncios"
+              />
             </div>
-            <div className='opcoes_consent'>
-              <div className='texto_consent'>Desenvolver e aprimorar serviços</div>
-              <input className='check_consent' id='desenvolver_servicos' type="checkbox" role='switch' name="info_dispositivo" />
+            <div className="opcoes_consent">
+              <div className="texto_consent">Desenvolver e aprimorar serviços</div>
+              <input
+                className="check_consent"
+                type="checkbox"
+                role="switch"
+                name="desenvolver_servicos"
+              />
             </div>
           </div>
           <div className='botoes_footer_modal'>
