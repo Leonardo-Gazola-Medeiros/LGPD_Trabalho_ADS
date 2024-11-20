@@ -3,32 +3,34 @@ const mysql = require('mysql2');
 
 
 exports.createUser = async (req, res) => {
+
+  console.log(`requisição recebida com os dados: ${JSON.stringify(req.body)}`);
   const { username, email, senha } = req.body;
 
   if (!username || !email || !senha) {
     return res.status(400).json({ error: 'All fields are required' });
   }
-
+  
   try {
-    console.log('Inserting new user:', { username, email, senha });  // Add this for debugging
-
+    console.log('Inserting new user:', { username, email, senha, genero, estado, endereco, data_nascimento }); 
+  
     con.query(
-      'INSERT INTO users (username, email, senha) VALUES (?, ?, ?)',
-      [username, email, senha],
+      `INSERT INTO users (username, email, senha, genero, estado, endereco, data_nascimento) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [username, email, senha, genero, estado, endereco, data_nascimento],
       (err, results) => {
         if (err) {
-          console.error('Error inserting user:', err);  // Log the specific error
+          console.error('Error inserting user:', err); // Log specific error
           return res.status(500).json({ error: 'Database error: ' + err.message });
         }
-        console.log('User inserted successfully:', results);  // Add this for debugging
+        console.log('User inserted successfully:', results); 
         res.status(201).json({ message: 'Usuário Cadastrado com Sucesso!' });
       }
     );
   } catch (error) {
-    console.error('Error during registration:', error);  // Log the specific error
+    console.error('Error during registration:', error); // Log specific error
     res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
-};
 
 
 exports.loginUser = async (req, res) => {
@@ -137,7 +139,7 @@ function addUserDeleteList(email) {
   const deleteDatabaseCon = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "1726",
+    password: "131313",
     database: "lgpd_removed_users"
   });
 
@@ -159,5 +161,6 @@ function addUserDeleteList(email) {
 
 
 
+}
 }
 

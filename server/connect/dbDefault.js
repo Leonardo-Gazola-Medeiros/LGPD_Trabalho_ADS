@@ -1,11 +1,15 @@
 const createTableQueries = {
   users: `
-      CREATE TABLE IF NOT EXISTS users (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      username VARCHAR(255),
-      senha VARCHAR(255),
-      email VARCHAR(200)
-      );
+     CREATE TABLE IF NOT EXISTS users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(255) NOT NULL,
+    senha VARCHAR(255) NOT NULL,
+    email VARCHAR(200) NOT NULL,
+    genero ENUM('Masculino', 'Feminino', 'Outro') NOT NULL,
+    estado VARCHAR(100) NOT NULL,
+    endereco VARCHAR(255) NOT NULL,
+    data_nascimento DATE NOT NULL,
+);
   `,
 
   mensagens: `

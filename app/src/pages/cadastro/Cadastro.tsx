@@ -4,17 +4,16 @@ import './Cadastro.css';
 import Modal from '@mui/material/Modal';
 import { Box, Typography } from '@mui/material';
 
-interface Term {
-  version: number;
-  texto: string;
-}
-
 const Cadastro: React.FC = () => {
   const [username, setNomeUsuario] = useState('');
   const [email, setEmailUsuario] = useState('');
   const [senha, setSenhaUsuario] = useState('');
+  const [genero, setGenero] = useState('Outro');
+  const [estado, setEstado] = useState('');
+  const [endereco, setEndereco] = useState('');
+  const [dataNascimento, setDataNascimento] = useState('');
   const [message, setMessage] = useState('');
-  const [openModal, setOpenModal] = useState(false);  
+  const [openModal, setOpenModal] = useState(false);
 
   const redirectToLogin = () => {
     window.location.href = '/login';
@@ -29,6 +28,10 @@ const Cadastro: React.FC = () => {
         username,
         email,
         senha,
+        genero,
+        estado,
+        endereco,
+        data_nascimento: dataNascimento, // Backend espera este formato
       });
 
       setMessage(response.data.message);
@@ -76,6 +79,47 @@ const Cadastro: React.FC = () => {
               required
             />
           </div>
+          <div className='form-group'>
+            <label htmlFor="genero">Gênero</label>
+            <select
+              value={genero}
+              onChange={(e) => setGenero(e.target.value)}
+              required
+            >
+              <option value="Masculino">Masculino</option>
+              <option value="Feminino">Feminino</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+          <div className='form-group'>
+            <label htmlFor="estado">Estado</label>
+            <input
+              type="text"
+              placeholder="Estado"
+              value={estado}
+              onChange={(e) => setEstado(e.target.value)}
+              required
+            />
+          </div>
+          <div className='form-group'>
+            <label htmlFor="endereco">Endereço</label>
+            <input
+              type="text"
+              placeholder="Endereço"
+              value={endereco}
+              onChange={(e) => setEndereco(e.target.value)}
+              required
+            />
+          </div>
+          <div className='form-group'>
+            <label htmlFor="dataNascimento">Data de Nascimento</label>
+            <input
+              type="date"
+              value={dataNascimento}
+              onChange={(e) => setDataNascimento(e.target.value)}
+              required
+            />
+          </div>
           <button type="submit">Register</button>
           {message && <p>{message}</p>}
         </form>
@@ -98,7 +142,7 @@ const Cadastro: React.FC = () => {
             Termo de consentimento
           </Typography>
           <Typography id="modal-modal-description" sx={{ my: 4 }}>
-            {JSON.parse(localStorage.getItem("terms") || "[]")[0].texto}
+            {JSON.parse(localStorage.getItem("terms") || "[]")[0]?.texto}
           </Typography>
           <button onClick={handleRegister}>Eu concordo</button>
           <button className='cancelButton' onClick={redirectToLogin}>Não concordo</button>
