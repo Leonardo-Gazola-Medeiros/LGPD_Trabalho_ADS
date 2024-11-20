@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './UserProfile.css';
+import './telaUsuario.css';
 
 interface User {
   id: number;
@@ -25,11 +25,21 @@ const UserProfile: React.FC = () => {
     data_nascimento: '',
   });
 
+  const getCookieValue = (name: string) => {
+    const cookies = document.cookie.split('; ');
+    const cookie = cookies.find(cookie => cookie.startsWith(`${name}=`));
+    return cookie ? decodeURIComponent(cookie.split('=')[1]) : null;
+  };
+
   useEffect(() => {
     // Simulação de carregamento de dados do usuário
+
+    const userId = getCookieValue('userId');
+
     const loadUserData = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/us/profile');
+        const response = await axios.get(`http://localhost:3000/us/${userId}`);
+        console.log(response.data);
         setUser(response.data);
         setFormData(response.data); // Preenche o formulário com dados existentes
       } catch (error) {
@@ -52,9 +62,10 @@ const UserProfile: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.put(`http://localhost:3000/us/update/${formData.id}`, formData);
+      const response = await axios.patch(`http://localhost:3000/us/${formData.id}`, formData);
+      console.log(response.data);
       setUser(response.data);
-      setIsEditing(false);
+      window.location.reload();
     } catch (error) {
       console.error('Error updating user data:', error);
     }

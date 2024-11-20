@@ -295,6 +295,9 @@ const Home: React.FC = () => {
         <button type='button' onClick={handleSettings} className='settings'>
           Settings
         </button>
+        <button type='button' onClick={() => window.location.href = '/user'} className='settings'>
+          Perfil
+        </button>
         <button type="button" onClick={redirectLogin} className="logoutButton">
           Logout
         </button>
