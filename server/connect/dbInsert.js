@@ -20,12 +20,13 @@ const insertDefaulConditions = {
 
 const insertDefaultUser = {
     users: `
-        INSERT INTO users(username,senha,email)
+        INSERT INTO users (username, senha, email, genero, estado, endereco, data_nascimento)
         VALUES
-        ('admin','admin','admin@admin.com'),
-        ('leo','leo','leo@leo.com'),
-        ('pedro','pedro','pedro@pedro.com'),
-        ('gustavo','gustavo','gustavo@gustavo.com')
+        ('admin', 'admin', 'admin@admin.com', 'Outro', 'São Paulo', 'Rua Admin, 123', '1990-01-01'),
+        ('leo', 'leo', 'leo@leo.com', 'Masculino', 'Rio de Janeiro', 'Rua Leo, 456', '1992-05-15'),
+        ('pedro', 'pedro', 'pedro@pedro.com', 'Masculino', 'Minas Gerais', 'Rua Pedro, 789', '1985-08-20'),
+        ('gustavo', 'gustavo', 'gustavo@gustavo.com', 'Masculino', 'Bahia', 'Rua Gustavo, 101', '1993-11-30');
+
     `
 }
 

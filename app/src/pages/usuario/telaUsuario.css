@@ -1,0 +1,67 @@
+/* UserProfile.css */
+.user-profile {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  h2 {
+    text-align: center;
+  }
+  
+  .user-profile-form .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .user-profile-form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .user-profile-form input,
+  .user-profile-form select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+  }
+  
+  .user-profile-form .form-actions {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .user-profile-form button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .user-profile-form button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .user-profile-form button[type="button"] {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .user-details p {
+    margin: 10px 0;
+  }
+  
+  button {
+    padding: 8px 16px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  

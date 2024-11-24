@@ -35,7 +35,7 @@ app.use(helmet());
 app.use(limiter);
 app.use(cors({
     origin: 'http://localhost:5173',
-    methods: ['POST', 'GET', 'PUT', 'DELETE'],
+    methods: ['POST', 'GET', 'PUT', 'DELETE','PATCH'],
     credentials: true
 }));
 app.set('view engine', 'ejs');

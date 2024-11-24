@@ -2,6 +2,7 @@ import { RouteProps } from 'react-router-dom';
 import Home from '../pages/home/Home';
 import LoginPage from '../pages/login/Login';
 import Cadastro from '../pages/cadastro/Cadastro';
+import UserProfile from '../pages/usuario/telaUsuario';
 
 export interface AppRoute extends RouteProps {
   path: string;
@@ -21,11 +22,16 @@ const routes: AppRoute[] = [
     component: LoginPage,
     exact: true,
   },
-  
+
   {
-    path:'/register',
+    path: '/register',
     component: Cadastro,
-    exact:true,
+    exact: true,
+  },
+  {
+    path: '/user',
+    component: UserProfile,
+    exact: true,
   },
 ];
 
