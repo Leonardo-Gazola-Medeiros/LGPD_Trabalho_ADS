@@ -1,4 +1,4 @@
-const con = require('../connect/dbconnect');
+const { con, con_backup } = require('../connect/dbconnect');
 
 exports.sendMessage = async (req, res) => {
   const { userId, mensagem } = req.body;

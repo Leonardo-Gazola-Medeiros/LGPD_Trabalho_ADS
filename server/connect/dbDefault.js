@@ -2,13 +2,16 @@ const createTableQueries = {
   users: `
     CREATE TABLE IF NOT EXISTS users (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(255) NOT NULL,
-    senha VARCHAR(255) NOT NULL,
-    email VARCHAR(200) NOT NULL,
-    genero ENUM('Masculino', 'Feminino', 'Outro') NOT NULL,
-    estado VARCHAR(100) NOT NULL,
-    endereco VARCHAR(255) NOT NULL,
-    data_nascimento DATE NOT NULL
+    username VARCHAR(255),
+    senha VARCHAR(255),
+    email VARCHAR(200),
+    genero ENUM('Masculino', 'Feminino', 'Outro'),
+    estado VARCHAR(100),
+    endereco VARCHAR(255),
+    data_nascimento DATETIME,
+    created_at DATETIME,
+    updated_at DATETIME,
+    deleted_at DATETIME
 );
   `,
 
@@ -92,10 +95,9 @@ const createTriggers = {
         INSERT INTO usuario_termo (id_user, id_termo, aceito)
         SELECT id, NEW.version, FALSE FROM users;
     END 
-`,
+  `,
 
   aceiteUsuarioTrigger: `
-  
     CREATE TRIGGER IF NOT EXISTS after_condicao_insert
     AFTER INSERT ON condicoes
     FOR EACH ROW
@@ -103,10 +105,49 @@ const createTriggers = {
       INSERT INTO aceites (id_user, id_condicao, aceite)
       SELECT id, NEW.id_condicao, FALSE FROM users;
     END
+  `,
+
+  beforeUserInsertTrigger: `
+    CREATE TRIGGER IF NOT EXISTS before_user_insert
+    BEFORE INSERT ON users
+    FOR EACH ROW
+    BEGIN
+        IF NEW.created_at IS NULL THEN
+            SET NEW.created_at = NOW();
+        END IF;
+        SET NEW.updated_at = NOW();
+    END
+  `,
+
+  beforeUserUpdateTrigger: `
+    CREATE TRIGGER IF NOT EXISTS before_user_update
+    BEFORE UPDATE ON users
+    FOR EACH ROW
+    BEGIN
+        SET NEW.updated_at = NOW();
+    END
+  `
+};
+
+const createUsersBackup = {
+  usersBackup:`
+    CREATE TABLE IF NOT EXISTS users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(255),
+    senha VARCHAR(255),
+    email VARCHAR(200),
+    genero ENUM('Masculino', 'Feminino', 'Outro'),
+    estado VARCHAR(100),
+    endereco VARCHAR(255),
+    data_nascimento DATE,
+    created_at DATETIME,
+    updated_at DATETIME,
+    deleted_at DATETIME
+    )
   `
 }
 
-module.exports = { createTableQueries, createForeignKeys, createTriggers };
+module.exports = { createTableQueries, createForeignKeys, createTriggers, createUsersBackup };
 
 /*
 

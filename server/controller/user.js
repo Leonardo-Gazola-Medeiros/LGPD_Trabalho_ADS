@@ -1,8 +1,7 @@
-const con = require('../connect/dbconnect');
+const { con, con_backup } = require('../connect/dbconnect');
 const mysql = require('mysql2');
 
 exports.createUser = async (req, res) => {
-  console.log(`Requisição recebida com os dados: ${JSON.stringify(req.body)}`);
   const { username, email, senha, genero, estado, endereco, data_nascimento } = req.body;
 
   if (!username || !email || !senha) {
@@ -10,26 +9,47 @@ exports.createUser = async (req, res) => {
   }
 
   try {
-    console.log('Inserting new user:', { username, email, senha, genero, estado, endereco, data_nascimento });
-
     con.query(
       `INSERT INTO users (username, email, senha, genero, estado, endereco, data_nascimento) 
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [username, email, senha, genero, estado, endereco, data_nascimento],
       (err, results) => {
         if (err) {
-          console.error('Error inserting user:', err);
+          console.error('Error inserting user in main DB:', err);
           return res.status(500).json({ error: 'Database error: ' + err.message });
         }
-        console.log('User inserted successfully:', results);
-        res.status(201).json({ message: 'Usuário Cadastrado com Sucesso!' });
+
+        const insertedUserId = results.insertId;
+
+        // Pega os dados do usuário recém-criado no banco principal
+        con.query('SELECT * FROM users WHERE id = ?', [insertedUserId], (err, userData) => {
+          if (err) {
+            console.error('Error fetching user from main DB:', err);
+            return res.status(500).json({ error: 'Error fetching user data: ' + err.message });
+          }
+
+          // Insere os dados no banco de backup
+          con_backup.query(
+            `INSERT INTO users (username, email, senha, genero, estado, endereco, data_nascimento) 
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [userData[0].username, userData[0].email, userData[0].senha, userData[0].genero, userData[0].estado, userData[0].endereco, userData[0].data_nascimento],
+            (err) => {
+              if (err) {
+                console.error('Error inserting user in backup DB:', err);
+              }
+            }
+          );
+
+          res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
+        });
       }
     );
   } catch (error) {
-    console.error('Error during registration:', error);
+    console.error('Error during user creation:', error);
     res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
+
 
 exports.loginUser = async (req, res) => {
   const { email, senha } = req.body;
@@ -83,34 +103,43 @@ exports.deleteUser = async (req, res) => {
     const { email } = results[0];
     addUserDeleteList(email);
 
-    con.query(
-      'DELETE FROM users WHERE id = ?',
-      [userId],
-      (err, results) => {
-        if (err) {
-          console.error('Error deleting user:', err);
-          return res.status(500).json({ error: 'Database error: ' + err.message });
-        }
-
-        if (results.affectedRows === 0) {
-          return res.status(404).json({ error: 'User not found' });
-        }
-
-        res.status(200).json({ message: 'Usuário deletado com sucesso!' });
-      }
+    // Atualizar os valores do usuário no banco principal
+    const deletedAt = new Date().toISOString().slice(0, 19).replace('T', ' '); // Timestamp atual
+    await con.promise().query(
+      `UPDATE users 
+       SET username = NULL, email = NULL, genero = NULL, estado = NULL, endereco = NULL, data_nascimento = NULL, senha = NULL, created_at = NULL, updated_at = NULL, deleted_at = ? 
+       WHERE id = ?`,
+      [deletedAt, userId]
     );
+
+    // Atualizar o usuário no banco de backup
+    try {
+      await con_backup.promise().query(
+        `UPDATE users 
+         SET username = NULL, email = NULL, genero = NULL, estado = NULL, endereco = NULL, data_nascimento = NULL, senha = NULL, created_at = NULL, updated_at = NULL, deleted_at = ? 
+         WHERE id = ?`,
+        [deletedAt, userId]
+      );
+
+      res.status(200).json({ message: 'Usuário deletado com sucesso e backup atualizado!' });
+    } catch (backupError) {
+      console.error('Error updating backup database:', backupError);
+      res.status(500).json({ error: 'Backup database error: ' + backupError.message });
+    }
   } catch (error) {
     console.error('Error during deletion:', error);
     res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
 
+
+
 function addUserDeleteList(email) {
   const deleteDatabaseCon = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "131313",
-    database: "lgpd_removed_users"
+    password: "lgpd",
+    database: "lgpd_backup"
   });
 
   deleteDatabaseCon.connect((err) => {
@@ -140,7 +169,7 @@ function updateUser(req, res) {
   }
 
   // Converte a data para o formato correto
-  const formattedDate = new Date(data_nascimento).toISOString().split('T')[0]; 
+  const formattedDate = new Date(data_nascimento).toISOString().split('T')[0];
 
   try {
     con.query(
@@ -148,15 +177,34 @@ function updateUser(req, res) {
       [username, genero, estado, endereco, formattedDate, userId],
       (err, results) => {
         if (err) {
-          console.error('Error updating user:', err);
-          return res.status(500).json({ error: 'Database error: ' + err.message });
+          console.error('Error updating user in primary database:', err);
+          return res.status(500).json({ error: 'Primary database error: ' + err.message });
         }
 
         if (results.affectedRows === 0) {
-
-          return res.status(404).json({ error: 'User not found' });
+          return res.status(404).json({ error: 'User not found in primary database' });
         }
-        res.status(200).json({ message: 'Usuário atualizado com sucesso!' });
+
+        // Update user in backup database
+        con_backup.query(
+          'UPDATE users SET username = ?, genero = ?, estado = ?, endereco = ?, data_nascimento = ? WHERE id = ?',
+          [username, genero, estado, endereco, formattedDate, userId],
+          (backupErr, backupResults) => {
+            if (backupErr) {
+              console.error('Error updating user in backup database:', backupErr);
+              return res.status(500).json({ error: 'Backup database error: ' + backupErr.message });
+            }
+
+            if (backupResults.affectedRows === 0) {
+              console.warn('User not found in backup database. Backup might be out of sync.');
+              return res.status(200).json({
+                message: 'User updated in primary database but not found in backup database',
+              });
+            }
+
+            res.status(200).json({ message: 'User updated successfully in both databases!' });
+          }
+        );
       }
     );
   } catch (error) {
@@ -164,6 +212,7 @@ function updateUser(req, res) {
     res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 }
+
 
 
 

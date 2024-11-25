@@ -1,6 +1,6 @@
 const mysql = require('mysql2/promise');
-const { createTableQueries, createForeignKeys, createTriggers } = require('./dbDefault');
-const { insertDefaultValues, insertDefaulConditions, insertDefaultUser, insertDefaultUserPermissions } = require('./dbInsert');
+const { createTableQueries, createForeignKeys, createTriggers, createUsersBackup } = require('./dbDefault');
+const { insertDefaultValues, insertDefaulConditions, insertDefaultUser, insertDefaultUserPermissions, insertDefaultBackup } = require('./dbInsert');
 
 (async () => {
     try {
@@ -55,7 +55,13 @@ const { insertDefaultValues, insertDefaulConditions, insertDefaultUser, insertDe
                 console.log(`Valores já existentes em ${tableName}, inserção ignorada`);
             }
         };
-
+        
+        // Criar triggers
+        for (const trigger of Object.keys(createTriggers)) {
+            await con.query(createTriggers[trigger]);
+            console.log(`Trigger ${trigger} criada com sucesso`);
+        }
+        
         // Inserir valores padrões nas tabelas
         await insertIfEmpty('termos', insertDefaultValues.termos);
         await insertIfEmpty('condicoes', insertDefaulConditions.conditions);
@@ -63,17 +69,20 @@ const { insertDefaultValues, insertDefaulConditions, insertDefaultUser, insertDe
         await insertIfEmpty('usuario_termo', insertDefaultUserPermissions.permissions);
         await insertIfEmpty('aceites', insertDefaultUserPermissions.aceites);
 
-        // Criar triggers
-        for (const trigger of Object.keys(createTriggers)) {
-            await con.query(createTriggers[trigger]);
-            console.log(`Trigger ${trigger} criada com sucesso`);
+        // Criar banco de dados 'lgpd_backup'
+        await con.query("CREATE DATABASE IF NOT EXISTS lgpd_backup");
+        await con.query("USE lgpd_backup");
+
+        // Criar tabela de backup de usuários
+        if (createUsersBackup.usersBackup) {
+            await con.query(createUsersBackup.usersBackup);
+            console.log("Tabela de backup 'users' criada no banco de dados 'lgpd_backup'.");
+        } else {
+            console.error("Query para criar tabela de backup 'users' não encontrada.");
         }
 
-        // Criar banco de dados 'lgpd_removed_users' e tabela 'users'
-        await con.query("CREATE DATABASE IF NOT EXISTS lgpd_removed_users");
-        await con.query("USE lgpd_removed_users");
-        await createTableIfNotExists("users", "CREATE TABLE users (id INT PRIMARY KEY AUTO_INCREMENT, email VARCHAR(200))");
-        console.log("Estrutura padrão do banco de dados 'lgpd_removed_users' criada");
+        // Inserir valores padrões nas tabelas
+        await insertIfEmpty('users', insertDefaultBackup.users);
 
         await con.end();
     } catch (err) {
