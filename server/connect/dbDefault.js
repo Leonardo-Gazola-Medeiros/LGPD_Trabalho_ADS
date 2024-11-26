@@ -10,8 +10,7 @@ const createTableQueries = {
     endereco VARCHAR(255),
     data_nascimento DATETIME,
     created_at DATETIME,
-    updated_at DATETIME,
-    deleted_at DATETIME
+    updated_at DATETIME
 );
   `,
 
