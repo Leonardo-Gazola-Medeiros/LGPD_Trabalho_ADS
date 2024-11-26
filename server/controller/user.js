@@ -94,36 +94,22 @@ exports.deleteUser = async (req, res) => {
   }
 
   try {
-    const [results] = await con.promise().query('SELECT email FROM users WHERE id = ?', [userId]);
+    // Verificar se o usuário existe no banco principal
+    const [results] = await con.promise().query('SELECT id FROM users WHERE id = ?', [userId]);
 
     if (results.length === 0) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
 
-    const { email } = results[0];
-    addUserDeleteList(email);
+    // Remover completamente o usuário do banco principal
+    await con.promise().query('DELETE FROM users WHERE id = ?', [userId]);
 
-    // Atualizar os valores do usuário no banco principal
-    const deletedAt = new Date().toISOString().slice(0, 19).replace('T', ' '); // Timestamp atual
-    await con.promise().query(
-      `UPDATE users 
-       SET username = NULL, email = NULL, genero = NULL, estado = NULL, endereco = NULL, data_nascimento = NULL, senha = NULL, created_at = NULL, updated_at = NULL, deleted_at = ? 
-       WHERE id = ?`,
-      [deletedAt, userId]
-    );
-
-    // Atualizar o usuário no banco de backup
+    // Inserir o ID do usuário deletado no banco de backup
     try {
-      await con_backup.promise().query(
-        `UPDATE users 
-         SET username = NULL, email = NULL, genero = NULL, estado = NULL, endereco = NULL, data_nascimento = NULL, senha = NULL, created_at = NULL, updated_at = NULL, deleted_at = ? 
-         WHERE id = ?`,
-        [deletedAt, userId]
-      );
-
-      res.status(200).json({ message: 'Usuário deletado com sucesso e backup atualizado!' });
+      await con_backup.promise().query('INSERT INTO users (id) VALUES (?)', [userId]);
+      res.status(200).json({ message: 'Usuário deletado com sucesso e ID armazenado no backup!' });
     } catch (backupError) {
-      console.error('Error updating backup database:', backupError);
+      console.error('Error inserting into backup database:', backupError);
       res.status(500).json({ error: 'Backup database error: ' + backupError.message });
     }
   } catch (error) {
@@ -133,13 +119,12 @@ exports.deleteUser = async (req, res) => {
 };
 
 
-
 function addUserDeleteList(email) {
   const deleteDatabaseCon = mysql.createConnection({
     host: "localhost",
     user: "root",
     password: "lgpd",
-    database: "lgpd_backup"
+    database: "lgpd_removed_users"
   });
 
   deleteDatabaseCon.connect((err) => {
@@ -212,9 +197,6 @@ function updateUser(req, res) {
     res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 }
-
-
-
 
 function getUserById(req, res) {
   const { id } = req.params;

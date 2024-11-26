@@ -12,7 +12,7 @@ const con_backup = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: "lgpd_backup"
+  database: "lgpd_removed_users"
 });
 
 // Connect to the database

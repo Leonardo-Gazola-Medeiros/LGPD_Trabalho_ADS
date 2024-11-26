@@ -67,16 +67,4 @@ const insertDefaultUserPermissions = {
     `
 }
 
-const insertDefaultBackup = {
-    users: `
-        INSERT INTO users (username, senha, email, genero, estado, endereco, data_nascimento, created_at, updated_at)
-        VALUES
-        ('admin', 'admin', 'admin@admin.com', 'Outro', 'São Paulo', 'Rua Admin, 123', '1990-01-01', NOW(), NOW()),
-        ('leo', 'leo', 'leo@leo.com', 'Masculino', 'Rio de Janeiro', 'Rua Leo, 456', '1992-05-15', NOW(), NOW()),
-        ('pedro', 'pedro', 'pedro@pedro.com', 'Masculino', 'Minas Gerais', 'Rua Pedro, 789', '1985-08-20', NOW(), NOW()),
-        ('gustavo', 'gustavo', 'gustavo@gustavo.com', 'Masculino', 'Bahia', 'Rua Gustavo, 101', '1993-11-30', NOW(), NOW());
-
-    `
-}
-
-module.exports = { insertDefaultValues, insertDefaulConditions, insertDefaultUser, insertDefaultUserPermissions, insertDefaultBackup }
+module.exports = { insertDefaultValues, insertDefaulConditions, insertDefaultUser, insertDefaultUserPermissions }

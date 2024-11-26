@@ -129,25 +129,15 @@ const createTriggers = {
   `
 };
 
-const createUsersBackup = {
-  usersBackup:`
+const createRemovedUsers = {
+  removedUsers:`
     CREATE TABLE IF NOT EXISTS users (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(255),
-    senha VARCHAR(255),
-    email VARCHAR(200),
-    genero ENUM('Masculino', 'Feminino', 'Outro'),
-    estado VARCHAR(100),
-    endereco VARCHAR(255),
-    data_nascimento DATE,
-    created_at DATETIME,
-    updated_at DATETIME,
-    deleted_at DATETIME
+    id INT NOT NULL
     )
   `
 }
 
-module.exports = { createTableQueries, createForeignKeys, createTriggers, createUsersBackup };
+module.exports = { createTableQueries, createForeignKeys, createTriggers, createRemovedUsers };
 
 /*
 
