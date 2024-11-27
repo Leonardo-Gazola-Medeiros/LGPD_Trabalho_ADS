@@ -4,51 +4,84 @@ const mysql = require('mysql2');
 exports.createUser = async (req, res) => {
   const { username, email, senha, genero, estado, endereco, data_nascimento } = req.body;
 
+  // Validação dos campos obrigatórios
   if (!username || !email || !senha) {
-    return res.status(400).json({ error: 'All fields are required' });
+    return res.status(400).json({ error: 'Todos os campos obrigatórios devem ser preenchidos.' });
   }
 
   try {
+    // Inserção do usuário no banco de dados principal
     con.query(
       `INSERT INTO users (username, email, senha, genero, estado, endereco, data_nascimento) 
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [username, email, senha, genero, estado, endereco, data_nascimento],
       (err, results) => {
         if (err) {
-          console.error('Error inserting user in main DB:', err);
-          return res.status(500).json({ error: 'Database error: ' + err.message });
+          console.error('Erro ao inserir usuário no banco de dados principal:', err);
+          return res.status(500).json({ error: 'Erro no banco de dados: ' + err.message });
         }
 
-        const insertedUserId = results.insertId;
+        const insertedUserId = results.insertId; // ID do usuário recém-criado
 
-        // Pega os dados do usuário recém-criado no banco principal
-        con.query('SELECT * FROM users WHERE id = ?', [insertedUserId], (err, userData) => {
-          if (err) {
-            console.error('Error fetching user from main DB:', err);
-            return res.status(500).json({ error: 'Error fetching user data: ' + err.message });
-          }
-
-          // Insere os dados no banco de backup
-          con_backup.query(
-            `INSERT INTO users (username, email, senha, genero, estado, endereco, data_nascimento) 
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [userData[0].username, userData[0].email, userData[0].senha, userData[0].genero, userData[0].estado, userData[0].endereco, userData[0].data_nascimento],
-            (err) => {
-              if (err) {
-                console.error('Error inserting user in backup DB:', err);
-              }
+        // Recuperar o ID do termo mais recente
+        con.query(
+          'SELECT version FROM termos ORDER BY version DESC LIMIT 1',
+          (err, termoResults) => {
+            if (err) {
+              console.error('Erro ao buscar o termo mais recente:', err);
+              return res.status(500).json({ error: 'Erro ao buscar o termo mais recente: ' + err.message });
             }
-          );
 
-          res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
-        });
+            if (termoResults.length === 0) {
+              return res.status(404).json({ error: 'Nenhum termo encontrado.' });
+            }
+
+            const latestTermId = termoResults[0].version;
+
+            // Inserir na tabela usuario_termo
+            con.query(
+              'INSERT INTO usuario_termo (id_user, id_termo) VALUES (?, ?)',
+              [insertedUserId, latestTermId],
+              (err) => {
+                if (err) {
+                  console.error('Erro ao inserir na tabela usuario_termo:', err);
+                  return res.status(500).json({ error: 'Erro ao vincular o usuário ao termo: ' + err.message });
+                }
+
+                // Recupera os dados completos do usuário recém-criado
+                con.query(
+                  'SELECT * FROM users WHERE id = ?',
+                  [insertedUserId],
+                  (err, userData) => {
+                    if (err) {
+                      console.error('Erro ao buscar dados do usuário:', err);
+                      return res.status(500).json({ error: 'Erro ao buscar dados do usuário: ' + err.message });
+                    }
+
+                    // Garante que há um resultado e retorna o usuário
+                    if (userData.length > 0) {
+                      res.status(201).json({
+                        message: 'Usuário cadastrado com sucesso e termo aceito!',
+                        newUser: userData[0], // Retorna os dados do usuário recém-criado
+                      });
+                    } else {
+                      res.status(404).json({ error: 'Usuário criado, mas não encontrado.' });
+                    }
+                  }
+                );
+              }
+            );
+          }
+        );
       }
     );
   } catch (error) {
-    console.error('Error during user creation:', error);
-    res.status(500).json({ error: 'Internal server error: ' + error.message });
+    console.error('Erro durante a criação do usuário:', error);
+    res.status(500).json({ error: 'Erro interno no servidor: ' + error.message });
   }
 };
+
+
 
 
 exports.loginUser = async (req, res) => {
@@ -63,7 +96,7 @@ exports.loginUser = async (req, res) => {
       'SELECT * FROM users WHERE email = ? AND senha = ?',
       [email, senha],
       (err, results) => {
-        if (err) {
+          if (err) {
           console.error('Database error:', err);
           return res.status(500).json({ error: 'Database error' });
         }

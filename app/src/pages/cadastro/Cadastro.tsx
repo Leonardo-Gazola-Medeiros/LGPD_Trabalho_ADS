@@ -23,6 +23,11 @@ const Cadastro: React.FC = () => {
     e.preventDefault();
     setOpenModal(false);
 
+
+    const ultimoTermo = JSON.parse(localStorage.getItem("terms") || "[]")[0]
+    console.log(ultimoTermo)
+
+
     try {
       const response = await axios.post('http://localhost:3000/us/register/', {
         username,
@@ -34,6 +39,12 @@ const Cadastro: React.FC = () => {
         data_nascimento: dataNascimento, // Backend espera este formato
       });
 
+
+      const AcceptResponse = await axios.post(`http://localhost:3000/term/acc/${response.data.newUser.id}`, {
+        id_term: ultimoTermo.version,
+      });
+
+      console.log("response accept",AcceptResponse)
       setMessage(response.data.message);
     } catch (error) {
       console.error('There was an error!', error);
