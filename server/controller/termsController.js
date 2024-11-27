@@ -27,8 +27,8 @@ exports.getAllTerms = async (req, res) => {
 
 // --------- FUNÇÕES DAS CONDIÇÕES --------- //
 
-exports.getAllConditions = async (req, res) => {
-    const query = 'SELECT * FROM condicoes WHERE version_id ORDER BY version_id DESC LIMIT 1';
+exports.getAllOptionalConditions = async (req, res) => {
+    const query = 'SELECT * FROM condicoes';
     con.query(query, (error, results) => {
         if (error) {
             console.error("Erro na busca das condições: ", error);
@@ -38,17 +38,36 @@ exports.getAllConditions = async (req, res) => {
     });
 };
 
-exports.InsertCondition = async (req, res) => {
-    const { version_id, nome, obrigatorio } = req.body;
-    const query = 'INSERT INTO condicoes (version_id, nome, obrigatorio) VALUES (?,?,?)'
-    con.query(query[version_id, nome, obrigatorio], (error, results) => {
+exports.getConditionsObrigatorias = async (req, res) => {
+    const query = 'SELECT * FROM condicoes WHERE obrigatorio = 1';
+    con.query(query, (error, results) => {
         if (error) {
-            console.error("Error inserting term: ", error);
-            return res.status(500).json({ error: 'Database error: ' + error.message })
+            console.error("Erro na busca das condições: ", error);
+            return res.status(500).json({ error: 'Database error: ' + error.message });
         }
-        res.status(201).json({ id: results.insertId })
+        res.status(200).json(results);
     });
 };
+
+
+exports.InsertCondition = async (req, res) => {
+    const { nome, obrigatorio } = req.body;
+  
+    if (!nome) {
+      return res.status(400).json({ error: 'Condition name is required.' });
+    }
+  
+    const query = 'INSERT INTO condicoes (nome, obrigatorio) VALUES (?, ?)';
+    con.query(query, [nome, obrigatorio], (error, results) => {
+      if (error) {
+        console.error('Error inserting condition:', error);
+        return res.status(500).json({ error: 'Database error: ' + error.message });
+      }
+  
+      res.status(200).json({ message: 'Condition inserted successfully.', id: results.insertId });
+    });
+  };
+  
 
 // --------- FUNÇÕES DOS ACEITES DO USUARIO --------- //
 
@@ -65,51 +84,60 @@ exports.getAceites = async (req, res) => {
 
 
 exports.insertAceites = async (req, res) => {
-    console.log('Iniciando update');
+    const userId = req.params.user_id; // Retrieve the user ID from the URL
+    const conditions = req.body.data; // Array of { id_condicao, aceite }
     
-    const {
-      info_dispositivo,
-      dados_usuario,
-      perfis_anuncio_personalizado,
-      usar_perfis_anuncios,
-      desenvolver_servicos,
-    } = req.body;
-    
-    const id_user = req.params.user_id; // Pegando o ID do usuário da URL
-  
-    const consentArray = [
-      { id_condicao: 1, aceite: info_dispositivo },
-      { id_condicao: 2, aceite: dados_usuario },
-      { id_condicao: 3, aceite: perfis_anuncio_personalizado },
-      { id_condicao: 4, aceite: usar_perfis_anuncios },
-      { id_condicao: 5, aceite: desenvolver_servicos },
-    ];
-  
-    // Loop para atualizar cada item individualmente
-    for (const consent of consentArray) {
-      const query = `
-        UPDATE aceites 
-        SET aceite = ? 
-        WHERE id_user = ? AND id_condicao = ?
-      `;
-      
-      // Executa a query para cada condição
-      await new Promise((resolve, reject) => {
-        con.query(
-          query,
-          [consent.aceite, id_user, consent.id_condicao],
-          (error, results) => {
-            if (error) {
-              console.error('Erro ao atualizar os aceites:', error);
-              return reject(error);
-            }
-            resolve(results);
-          }
-        );
-      });
+    if (!userId || !Array.isArray(conditions)) {
+      return res.status(400).json({ error: 'Invalid input' });
     }
   
-    res.status(200).json({ message: 'Consentimentos atualizados com sucesso' });
+    const insertAceitesQuery = `
+      INSERT INTO aceites (id_user, id_condicao, aceite)
+      VALUES (?, ?, ?);
+    `;
+  
+    const updateUltimosAceitesQuery = `
+        UPDATE ultimos_aceites 
+        SET aceite = ?, data_alterada = NOW()
+        WHERE id_user = ? AND id_condicao = ?;
+    `;
+  
+    try {
+      const promises = conditions.map(({ id_condicao, aceite }) => {
+        // Insert into `aceites`
+        const aceitesPromise = new Promise((resolve, reject) => {
+          con.query(
+            insertAceitesQuery,
+            [userId, id_condicao, aceite],
+            (error, results) => {
+              if (error) reject(error);
+              else resolve(results);
+            }
+          );
+        });
+  
+        // Update `ultimos_aceites`
+        const ultimosAceitesPromise = new Promise((resolve, reject) => {
+          con.query(
+            updateUltimosAceitesQuery,
+            [aceite, userId, id_condicao],
+            (error, results) => {
+              if (error) reject(error);
+              else resolve(results);
+            }
+          );
+        });
+  
+        return Promise.all([aceitesPromise, ultimosAceitesPromise]);
+      });
+  
+      await Promise.all(promises);
+  
+      res.status(200).json({ message: 'Conditions updated successfully in both tables.' });
+    } catch (error) {
+      console.error('Error updating conditions:', error);
+      res.status(500).json({ error: 'Database error: ' + error.message });
+    }
   };
 
 

@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import './HomePage.css';
 import axios from 'axios';
-import { Button, Modal, TextareaAutosize } from '@mui/material';
-import { Box, Typography } from '@mui/material';
+import { Modal, Box, Button, TextField, Checkbox, FormControlLabel,TextareaAutosize,Typography } from '@mui/material';
 import { redirect } from 'react-router-dom';
 
 interface Message {
   username: string;
   mensagem: string;
   data: string;
+}
+
+interface Condition {
+  nome: string;
+  obrigatorio: number
+  id_condicao: number;
 }
 
 axios.defaults.withCredentials = true;
@@ -24,12 +29,62 @@ const Home: React.FC = () => {
   const [openTerms, setOpenTerms] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [ultimoTermoId, setUltimoTermoId] = useState<number | null>(null);
+  const [conditions, setConditions] = useState<Condition[]>([]);
+  const [acceptedConditions, setAcceptedConditions] = useState<{ [key: string]: boolean }>({});
+  const [obrigatorias, setObrigatorias] = useState<Condition[]>([]);
 
   const [termsText, setTermsText] = useState<string>('');
   const [tempTermsText, setTempTermsText] = useState<string>('');  // Valor temporário para os termos
   const [initialTermsText, setInitialTermsText] = useState<string>(''); // Valor inicial para restaurar
 
+  const [openConditionModal, setOpenConditionModal] = useState(false);
+  const [conditionName, setConditionName] = useState('');
+  const [isRequired, setIsRequired] = useState(false);
+
+
+  const handleOpenConditionModal = () => setOpenConditionModal(true);
+  const handleCloseConditionModal = () => setOpenConditionModal(false);
+
+
   useEffect(() => {
+    // Initialize all conditions as checked by default
+    const initialConditions: { [key: string]: boolean } = {};
+    conditions.forEach((cond) => {
+      initialConditions[cond.nome] = true; // Set default to checked
+    });
+    setAcceptedConditions(initialConditions);
+  }, [conditions]);
+
+  
+
+  const handleCreateCondition = async () => {
+    if (!conditionName.trim()) {
+      alert('Please provide a valid condition name.');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:3000/term/cond', {
+        nome: conditionName,
+        obrigatorio: isRequired ? 1 : 0,
+      });
+
+      if (response.status === 200) {
+        alert('Condition created successfully!');
+        setConditionName('');
+        setIsRequired(false);
+        handleCloseConditionModal();
+      } else {
+        alert('Failed to create condition.');
+      }
+    } catch (error) {
+      console.error('Error creating condition:', error);
+      alert('An error occurred while creating the condition.');
+    }
+  };
+
+  useEffect(() => {
+
     const fetchData = async () => {
       if (!document.cookie) {
         redirectLogin();
@@ -189,6 +244,65 @@ const Home: React.FC = () => {
   };
 
 
+  const getConditions = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/term/cond');
+      setConditions(response.data);
+    } catch (error) {
+      console.error('Error fetching conditions:', error);
+    }
+  };
+
+  const getConditionsObrigatorias = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/term/obrigatorias');
+      setObrigatorias(response.data);
+    } catch (error) {
+      console.error('Error fetching conditions:', error);
+    }
+  };
+
+  useEffect(() => {
+    getConditionsObrigatorias();
+  }, []);
+
+
+
+  useEffect(() => {
+    getConditions();
+  }, []);
+
+  const submitConditions = async () => {
+    try {
+      const dataToSubmit = conditions.map((cond, index) => ({
+        id_condicao: cond.id_condicao, // Assuming condition IDs are sequential
+        aceite: !!acceptedConditions[cond.nome],
+      }));
+  
+      const response = await axios.post(
+        `http://localhost:3000/term/acc/insert/${userId}`,
+        { data: dataToSubmit }
+      );
+  
+      if (response.status === 200) {
+        alert('Conditions accepted successfully');
+      } else {
+        alert('There was an error submitting the conditions');
+      }
+    } catch (error) {
+      console.error('Error submitting conditions:', error);
+      alert('An error occurred while sending your responses.');
+    }
+  };
+
+  const handleCheckboxChange = (conditionName: string) => {
+    setAcceptedConditions((prev) => ({
+      ...prev,
+      [conditionName]: !prev[conditionName],
+    }));
+  };
+
+
   const handleRejectAll = () => {
     // Desmarca todas as checkboxes
     const checkboxes = document.querySelectorAll('.check_consent');
@@ -219,33 +333,6 @@ const Home: React.FC = () => {
         setOpenSettings(false); // Fecha o modal
       })
       .catch(error => console.error('Erro ao enviar consentimento:', error));
-  };
-
-  const handleSaveAndExit = () => {
-    // Pega o status de todas as checkboxes
-    const consentData = {
-      info_dispositivo: (document.querySelector('input[name="info_dispositivo"]') as HTMLInputElement)?.checked || false,
-      dados_usuario: (document.querySelector('input[name="dados_usuario"]') as HTMLInputElement)?.checked || false,
-      perfis_anuncio_personalizado: (document.querySelector('input[name="perfis_anuncio_personalizado"]') as HTMLInputElement)?.checked || false,
-      usar_perfis_anuncios: (document.querySelector('input[name="usar_perfis_anuncios"]') as HTMLInputElement)?.checked || false,
-      desenvolver_servicos: (document.querySelector('input[name="desenvolver_servicos"]') as HTMLInputElement)?.checked || false,
-    };
-    
-    // Faz a requisição para o servidor com os dados selecionados
-    fetch(`http://localhost:3000/term/acc/update/${userId}`, {
-      method: 'POST', // Mudança de POST para PUT
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(consentData),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        alert('Consentimento atualizado com sucesso.');
-      })
-      .catch((error) => console.error('Erro ao enviar consentimento:', error));
   };
 
 
@@ -351,53 +438,32 @@ const Home: React.FC = () => {
             Você concorda com o uso de nossa parte dos seguintes dados
           </p>
           <div className='divisor'></div>
-          <div>
-            <div className="opcoes_consent">
-              <div className="texto_consent">Armazenar informações do dispositivo</div>
-              <input
-                className="check_consent"
-                type="checkbox"
-                role="switch"
-                name="info_dispositivo"
-              />
-            </div>
-            <div className="opcoes_consent">
-              <div className="texto_consent">Uso dos dados do usuário</div>
-              <input
-                className="check_consent"
-                type="checkbox"
-                role="switch"
-                name="dados_usuario"
-              />
-            </div>
-            <div className="opcoes_consent">
-              <div className="texto_consent">Criar perfis de anuncio personalizado</div>
-              <input
-                className="check_consent"
-                type="checkbox"
-                role="switch"
-                name="perfis_anuncio_personalizado"
-              />
-            </div>
-            <div className="opcoes_consent">
-              <div className="texto_consent">Usar perfis para anuncios personalizados</div>
-              <input
-                className="check_consent"
-                type="checkbox"
-                role="switch"
-                name="usar_perfis_anuncios"
-              />
-            </div>
-            <div className="opcoes_consent">
-              <div className="texto_consent">Desenvolver e aprimorar serviços</div>
-              <input
-                className="check_consent"
-                type="checkbox"
-                role="switch"
-                name="desenvolver_servicos"
-              />
-            </div>
-          </div>
+            <h1>Termos de uso</h1>
+            <table
+            style={{
+              alignContent: 'center',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '90%',
+              margin: '5%',
+            }}
+          >
+            <tbody>
+              {conditions.map((cond, index) => (
+                <tr key={index}>
+                  <td>{index + 1}. {cond.nome}</td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={!!acceptedConditions[cond.nome]}
+                      onChange={() => handleCheckboxChange(cond.nome)}
+                      disabled={cond.obrigatorio === 1} // Lock the checkbox if obrigatorio is 1
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
           <div className='botoes_footer_modal'>
             <div className='options_modal_footer'>
               <button
@@ -406,10 +472,49 @@ const Home: React.FC = () => {
                   setOpenTerms(true);
                   setTempTermsText(tempTermsText);
                 }}>Ver Termos</button>
-              <button onClick={handleRejectAll}>Rejeitar Tudo</button>
-              <button onClick={handleSaveAndExit}>Salvar e Sair</button>
+              <button onClick={handleOpenConditionModal}>Criar Condição</button>
+              <button onClick={submitConditions}>Salvar e Sair</button>
             </div>
           </div>
+        </Box>
+      </Modal>
+
+      <Modal open={openConditionModal} onClose={handleCloseConditionModal}>
+        <Box
+          sx={{
+            width: 400,
+            margin: 'auto',
+            marginTop: '20vh',
+            padding: 2,
+            backgroundColor: 'white',
+            borderRadius: 2,
+          }}
+        >
+          <h2>Criar uma nova condição de uso</h2>
+          <TextField
+            fullWidth
+            label="Condição"
+            value={conditionName}
+            onChange={(e) => setConditionName(e.target.value)}
+            margin="normal"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={isRequired}
+                onChange={(e) => setIsRequired(e.target.checked)}
+              />
+            }
+            label="Obrigatória"
+          />
+          <Box display="flex" justifyContent="space-between" marginTop={2}>
+            <Button onClick={handleCloseConditionModal} variant="outlined">
+              Cancelar
+            </Button>
+            <Button onClick={handleCreateCondition} variant="contained" color="primary">
+              Criar
+            </Button>
+          </Box>
         </Box>
       </Modal>
 

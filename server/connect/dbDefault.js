@@ -25,6 +25,7 @@ const createTableQueries = {
   termos: `
     CREATE TABLE IF NOT EXISTS termos (
     version INT PRIMARY KEY AUTO_INCREMENT,
+    data_criado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     texto LONGTEXT
 );
   `,
@@ -32,9 +33,10 @@ const createTableQueries = {
   condicoes: `
       CREATE TABLE IF NOT EXISTS condicoes (
       id_condicao INT PRIMARY KEY AUTO_INCREMENT,
-      version_id INT,
+      data_criado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       nome LONGTEXT,
-      obrigatorio BOOL
+      obrigatorio BOOL,
+      data_alterado TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
   `,
 
@@ -42,10 +44,19 @@ const createTableQueries = {
       CREATE TABLE IF NOT EXISTS aceites (
       id_user INT,
       id_condicao INT,
+      data_alterada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       aceite BOOL
       );
   `,
 
+  ultimos_aceites: `
+    CREATE TABLE IF NOT EXISTS ultimos_aceites (
+    id_user INT,
+    id_condicao INT,
+    data_alterada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    aceite BOOL
+    );
+`,
 
   usuario_termo: `
   CREATE TABLE IF NOT EXISTS usuario_termo (
@@ -67,11 +78,6 @@ const createForeignKeys = {
       ON DELETE CASCADE;
     `,
 
-  fk_condicoes: `
-      ALTER TABLE condicoes 
-      ADD FOREIGN KEY (version_id) REFERENCES termos(version);
-  `,
-
   fk_aceites1: `
       ALTER TABLE aceites 
       ADD FOREIGN KEY (id_condicao) REFERENCES condicoes(id_condicao);
@@ -79,6 +85,17 @@ const createForeignKeys = {
 
   fk_aceites2: `
       ALTER TABLE aceites 
+      ADD FOREIGN KEY (id_user) REFERENCES users(id)
+      ON DELETE CASCADE;
+  `,
+
+  fk_ultimos_aceites1: `
+      ALTER TABLE ultimos_aceites 
+      ADD FOREIGN KEY (id_condicao) REFERENCES condicoes(id_condicao);
+  `,
+
+  fk_ultimos_aceites2: `
+      ALTER TABLE ultimos_aceites 
       ADD FOREIGN KEY (id_user) REFERENCES users(id)
       ON DELETE CASCADE;
   `
@@ -93,6 +110,7 @@ const createTriggers = {
     BEGIN
         INSERT INTO usuario_termo (id_user, id_termo, aceito)
         SELECT id, NEW.version, FALSE FROM users;
+        
     END 
   `,
 
@@ -102,6 +120,9 @@ const createTriggers = {
     FOR EACH ROW
     BEGIN
       INSERT INTO aceites (id_user, id_condicao, aceite)
+      SELECT id, NEW.id_condicao, FALSE FROM users;
+
+      INSERT INTO ultimos_aceites (id_user, id_condicao, aceite)
       SELECT id, NEW.id_condicao, FALSE FROM users;
     END
   `,

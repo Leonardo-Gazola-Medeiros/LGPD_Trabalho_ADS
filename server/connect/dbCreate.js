@@ -84,6 +84,7 @@ const { insertDefaultValues, insertDefaulConditions, insertDefaultUser, insertDe
         await insertIfEmpty('users', insertDefaultUser.users);
         await insertIfEmpty('usuario_termo', insertDefaultUserPermissions.permissions);
         await insertIfEmpty('aceites', insertDefaultUserPermissions.aceites);
+        await insertIfEmpty('ultimos_aceites', insertDefaultUserPermissions.ultimos_aceites);
 
         console.log("Dados padrão inseridos nas tabelas do banco de dados 'lgpd'.");
 

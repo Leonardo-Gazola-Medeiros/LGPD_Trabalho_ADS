@@ -8,13 +8,14 @@ const insertDefaultValues = {
 
 const insertDefaulConditions = {
     conditions: `
-        INSERT INTO condicoes(version_id,nome,obrigatorio)
+        INSERT INTO condicoes(nome,obrigatorio)
         VALUES 
-        (1, 'Armazenar informações do dispositivo', 0),
-        (1, 'Uso dos dados do usuário', 0),
-        (1, 'Criar perfis de anuncio personalizado', 0),
-        (1, 'Usar perfis para anuncios personalizados', 0),
-        (1, 'Desenvolver e aprimorar serviços com base nos dados', 0)
+        ('Armazenar informações do dispositivo', 0),
+        ('Uso dos dados do usuário', 0),
+        ('Criar perfis de anuncio personalizado', 0),
+        ('Usar perfis para anuncios personalizados', 0),
+        ('Desenvolver e aprimorar serviços com base nos dados', 0),
+        ('Respeitar as regras de uso',1)
     `
 }
 
@@ -42,6 +43,32 @@ const insertDefaultUserPermissions = {
 
     aceites: `
         INSERT INTO aceites(id_user,id_condicao,aceite)   
+        VALUES
+        (1,1,0),
+        (1,2,0),
+        (1,3,0),
+        (1,4,0),
+        (1,5,0),
+        (2,1,0),
+        (2,2,0),
+        (2,3,0),
+        (2,4,0),
+        (2,5,0),
+        (3,1,0),
+        (3,2,0),
+        (3,3,0),
+        (3,4,0),
+        (3,5,0),
+        (4,1,0),
+        (4,2,0),
+        (4,3,0),
+        (4,4,0),
+        (4,5,0)
+         
+    `,
+
+    ultimos_aceites: `
+        INSERT INTO ultimos_aceites(id_user,id_condicao,aceite)   
         VALUES
         (1,1,0),
         (1,2,0),
