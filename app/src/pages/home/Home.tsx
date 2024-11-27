@@ -289,9 +289,9 @@ const Home: React.FC = () => {
         <button type="button" onClick={handleDeleteAccount} className="deleteButton">
           Deletar minha conta
         </button>
-        <button onClick={retrieveData}>
+        {/* <button onClick={retrieveData}>
           recuperar meus dados
-        </button>
+        </button> */}
         <button type='button' onClick={handleSettings} className='settings'>
           Settings
         </button>

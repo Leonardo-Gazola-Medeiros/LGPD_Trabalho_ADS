@@ -171,26 +171,30 @@ function updateUser(req, res) {
         }
 
         // Update user in backup database
-        con_backup.query(
-          'UPDATE users SET username = ?, genero = ?, estado = ?, endereco = ?, data_nascimento = ? WHERE id = ?',
-          [username, genero, estado, endereco, formattedDate, userId],
-          (backupErr, backupResults) => {
-            if (backupErr) {
-              console.error('Error updating user in backup database:', backupErr);
-              return res.status(500).json({ error: 'Backup database error: ' + backupErr.message });
-            }
+        // con_backup.query(
+        //   'UPDATE users SET username = ?, genero = ?, estado = ?, endereco = ?, data_nascimento = ? WHERE id = ?',
+        //   [username, genero, estado, endereco, formattedDate, userId],
+        //   (backupErr, backupResults) => {
+        //     if (backupErr) {
+        //       console.error('Error updating user in backup database:', backupErr);
+        //       return res.status(500).json({ error: 'Backup database error: ' + backupErr.message });
+        //     }
 
-            if (backupResults.affectedRows === 0) {
-              console.warn('User not found in backup database. Backup might be out of sync.');
-              return res.status(200).json({
-                message: 'User updated in primary database but not found in backup database',
-              });
-            }
+        //     if (backupResults.affectedRows === 0) {
+        //       console.warn('User not found in backup database. Backup might be out of sync.');
+        //       return res.status(200).json({
+        //         message: 'User updated in primary database but not found in backup database',
+        //       });
+        //     }
 
-            res.status(200).json({ message: 'User updated successfully in both databases!' });
-          }
-        );
+        //     res.status(200).json({ message: 'User updated successfully in both databases!' });
+        //   }
+        // );
+
+        res.status(200).json({ message: 'User updated successfully in both databases!' })
       }
+
+      
     );
   } catch (error) {
     console.error('Error during update:', error);
